@@ -1,0 +1,15 @@
+# Participant data never goes into git (docs/decisions.md, D-015)
+data/raw/
+data/validation/
+# Synthetic sessions are generated on demand (handtonose simulate)
+data/sample/*/
+# Reports are generated; only the synthetic example is kept
+reports/*
+!reports/example_synthetic/
+
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+.DS_Store
