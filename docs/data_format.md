@@ -67,8 +67,13 @@ later (`sessions.device.audio.output_latency_s`).
 | `oa`, `ob`, `og` | `DeviceOrientationEvent` alpha, beta, gamma (last value before the sample) | deg |
 
 Phone axes (portrait, screen facing the person): x to the right, y up, z out of the screen
-(towards the face). With the phone upright and still, `ay` ≈ +9.8 on Android. Some iPhones report
-the opposite sign; the analysis checks the sign from the still period.
+(towards the face). With the phone upright and still, `ay` ≈ +9.8 on Android.
+
+**iPhone (Safari) reports `accelerationIncludingGravity` with the opposite sign**: at rest
+`ay` ≈ −9.6 and `az` has the opposite sign too (sessions F50F9F36, A56549CD vs B34CF91D, 11 Nov 2026).
+The app only uses magnitudes, so detection is not affected, but the analysis must flip the
+acceleration axes for iPhone sessions (`sessions.device.user_agent` contains "iPhone") before
+comparing left and right. The sign of `rotationRate` on iPhone vs Android still has to be checked.
 
 A trial recording starts 1 s before the still window that precedes the high beep and ends 0.5 s
 after the phone is still again: still → pause (2 s) → high beep → movement to the nose → touch

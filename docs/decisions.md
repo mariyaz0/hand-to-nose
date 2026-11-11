@@ -31,4 +31,7 @@ Decisions about the archived v0.1 Android app are not repeated here.
 | D-24 | 11 Nov | **Every error**: short vibration + a centred card with the reason ("Too early", "No nose touch", "Interrupted"). | In the pilot it was unclear what had happened after an error. |
 | D-25 | 11 Nov | Rest between the hands: **10 s** (was 20 s). | Pilot feedback. |
 | D-26 | 11 Nov | Thresholds tuned on the pilot: stillness gyro RMS 15 → **10** deg/s, SD of \|a\| 0.5 → **0.25** m/s²; movement before the beep gyro 45 → **20** deg/s, \|a\| change 1.5 → **1.0** m/s². | Pilot: still = 2–6 deg/s, 0.06–0.10 m/s²; pause noise ≤ 13 deg/s, ≤ 0.43 m/s²; real movements always > 20 deg/s but often < 45 deg/s and < 1 m/s² → the old values would miss an early slow movement (now a test case). |
+| D-27 | 11 Nov | **Participants so far:** P1 = `F50F9F36`, P2 = `A56549CD` (iPhone, app 2.1.0, 12 trials each). Pilot `B34CF91D` is excluded. | First two people who did the final protocol. |
+| D-28 | 11 Nov | iPhone acceleration has the opposite sign to Android; flip it in the analysis (see data_format.md). | Found in P1 and P2: at rest `ay` ≈ −9.6 vs +9.8 on the S24. |
+| D-29 | 11 Nov | The "too early" check stays as it is (rotation > 20 deg/s for 3 samples). | On iPhones the rotation while waiting for the beep sometimes reached 19–20 deg/s, so some of the 4 discarded attempts may have been hand sway; an extra repeat does not harm the data. A check based on the net rotation angle was proposed and can be added later. |
 
