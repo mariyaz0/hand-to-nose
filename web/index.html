@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f4ef">
+  <meta name="description" content="Hand-to-nose study, Bar-Ilan University">
+  <title>Which hand? · Hand-to-nose study</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2210%22 fill=%22%23b3261e%22/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <div id="lang" class="lang" role="group" aria-label="Language">
+    <button type="button" data-lang="en">EN</button>
+    <button type="button" data-lang="ru">RU</button>
+  </div>
+
+  <main>
+    <!-- 1. Welcome -->
+    <section id="s-welcome" class="screen">
+      <div class="badge">Bar-Ilan University · IBG lab</div>
+      <h1 data-i18n="app_title">Which hand?</h1>
+      <p class="lead" data-i18n="welcome_lead"></p>
+      <p data-i18n="welcome_what"></p>
+      <h2 data-i18n="welcome_need"></h2>
+      <ul class="need">
+        <li data-i18n="need_phone"></li>
+        <li data-i18n="need_sound"></li>
+        <li data-i18n="need_sit"></li>
+      </ul>
+      <p id="not-phone" class="note warn" hidden data-i18n="not_phone"></p>
+      <button id="btn-start" class="primary" type="button" data-i18n="btn_start">Start</button>
+    </section>
+
+    <!-- 2. Consent -->
+    <section id="s-consent" class="screen" hidden>
+      <h1 data-i18n="consent_title"></h1>
+      <p data-i18n="consent_p1"></p>
+      <p data-i18n="consent_p2"></p>
+      <p data-i18n="consent_p3"></p>
+      <label class="check">
+        <input id="consent-box" type="checkbox">
+        <span data-i18n="consent_check"></span>
+      </label>
+      <button id="btn-consent" class="primary" type="button" disabled data-i18n="btn_continue"></button>
+    </section>
+
+    <!-- 3. Questionnaire -->
+    <section id="s-questions" class="screen" hidden>
+      <h1 data-i18n="q_title"></h1>
+      <label class="field">
+        <span class="field-label" data-i18n="q_age"></span>
+        <input id="age" type="number" inputmode="numeric" min="10" max="110" autocomplete="off">
+      </label>
+      <div class="field">
+        <span class="field-label" data-i18n="q_sex"></span>
+        <div class="chips" id="sex">
+          <label class="chip"><input type="radio" name="sex" value="female"><span data-i18n="sex_female"></span></label>
+          <label class="chip"><input type="radio" name="sex" value="male"><span data-i18n="sex_male"></span></label>
+          <label class="chip"><input type="radio" name="sex" value="other"><span data-i18n="sex_other"></span></label>
+          <label class="chip"><input type="radio" name="sex" value="prefer_not_to_say"><span data-i18n="sex_na"></span></label>
+        </div>
+      </div>
+      <h2 data-i18n="q_hand_title"></h2>
+      <div id="edinburgh" class="ed"></div>
+      <button id="btn-questions" class="primary" type="button" disabled data-i18n="btn_continue"></button>
+    </section>
+
+    <!-- 4. Sensors and sound -->
+    <section id="s-setup" class="screen" hidden>
+      <h1 data-i18n="setup_title"></h1>
+      <p data-i18n="setup_text"></p>
+      <button id="btn-sensors" class="secondary" type="button" data-i18n="btn_sensors"></button>
+      <p id="sensor-status" class="note" aria-live="polite"></p>
+      <p data-i18n="sound_text"></p>
+      <div class="row">
+        <button id="btn-beep-high" class="secondary" type="button" data-i18n="btn_beep_high"></button>
+        <button id="btn-beep-low" class="secondary" type="button" data-i18n="btn_beep_low"></button>
+      </div>
+      <button id="btn-setup" class="primary" type="button" disabled data-i18n="btn_continue"></button>
+    </section>
+
+    <!-- 5. Explanation -->
+    <section id="s-explain" class="screen" hidden>
+      <h1 data-i18n="explain_title"></h1>
+      <div id="demo" class="demo"></div>
+      <ol id="steps" class="steps">
+        <li data-i18n="step_1"></li>
+        <li data-i18n="step_2"></li>
+        <li data-i18n="step_3"></li>
+        <li data-i18n="step_4"></li>
+        <li data-i18n="step_5"></li>
+      </ol>
+      <div class="grip">
+        <svg viewBox="0 0 100 120" class="grip-svg" aria-hidden="true">
+          <ellipse cx="50" cy="78" rx="34" ry="36" class="g-palm"/>
+          <rect x="22" y="44" width="9" height="30" rx="4.5" class="g-palm"/>
+          <rect x="68" y="34" width="9" height="15" rx="4.5" class="g-palm"/>
+          <rect x="69" y="52" width="9" height="15" rx="4.5" class="g-palm"/>
+          <rect x="68" y="70" width="9" height="14" rx="4.5" class="g-palm"/>
+          <rect x="30" y="12" width="40" height="80" rx="6" class="g-phone"/>
+          <rect x="33" y="17" width="34" height="70" rx="3" class="g-screen"/>
+          <circle cx="50" cy="52" r="3.5" class="g-dot"/>
+        </svg>
+        <div>
+          <h3 data-i18n="grip_title"></h3>
+          <p data-i18n="grip_text"></p>
+        </div>
+      </div>
+      <h3 data-i18n="speeds_title"></h3>
+      <table class="speeds">
+        <tr><th data-i18n="speed_fast"></th><td data-i18n="speed_fast_hint"></td></tr>
+        <tr><th data-i18n="speed_normal"></th><td data-i18n="speed_normal_hint"></td></tr>
+        <tr><th data-i18n="speed_slow"></th><td data-i18n="speed_slow_hint"></td></tr>
+      </table>
+      <p class="note" data-i18n="explain_note"></p>
+      <div class="row">
+        <button id="btn-replay" class="secondary" type="button" data-i18n="btn_replay"></button>
+        <button id="btn-practice" class="primary" type="button" data-i18n="btn_practice"></button>
+      </div>
+    </section>
+
+    <!-- 6. Rest between the blocks -->
+    <section id="s-rest" class="screen center" hidden>
+      <h1 data-i18n="rest_title"></h1>
+      <p id="rest-text" class="lead"></p>
+      <div id="rest-count" class="countdown"></div>
+    </section>
+
+    <!-- 7. Done -->
+    <section id="s-done" class="screen center" hidden>
+      <h1 data-i18n="done_title"></h1>
+      <p data-i18n="done_text"></p>
+      <p id="done-status" class="lead" aria-live="polite"></p>
+      <p id="done-code" class="code"></p>
+    </section>
+  </main>
+
+  <!-- Trial screen: full screen, the dot in the centre -->
+  <section id="s-trial" class="trial" hidden>
+    <div class="trial-top">
+      <div id="tr-progress" class="tr-progress"></div>
+      <div id="tr-hand" class="tr-hand"></div>
+      <div id="tr-speed" class="tr-speed"></div>
+    </div>
+    <div id="tr-zone" class="zone"></div>
+    <div id="tr-dot" class="dot"></div>
+    <div class="trial-bottom">
+      <div id="tr-status" class="tr-status" aria-live="assertive"></div>
+    </div>
+    <pre id="tr-debug" class="debug" hidden></pre>
+  </section>
+</body>
+</html>
