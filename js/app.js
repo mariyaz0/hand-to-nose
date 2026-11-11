@@ -9,6 +9,7 @@ import { SampleBuffer, windowStats } from './motion.js';
 import { TrialRunner, STATE } from './trial.js';
 import { Uploader } from './db.js';
 import { createDemo } from './demo.js';
+import { buildPlan as makePlan } from './plan.js';
 
 const $ = (id) => document.getElementById(id);
 const DEBUG = new URLSearchParams(location.search).has('debug');
@@ -70,15 +71,6 @@ function uuid() {
   b[8] = (b[8] & 0x3f) | 0x80;
   const h = [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
-}
-
-function shuffle(a) {
-  const r = a.slice();
-  for (let i = r.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [r[i], r[j]] = [r[j], r[i]];
-  }
-  return r;
 }
 
 function show(id) {
@@ -243,19 +235,9 @@ function initExplain() {
 // ---------------------------------------------------------------- plan of the session
 
 function buildPlan() {
-  const other = app.firstHand === 'right' ? 'left' : 'right';
-  const speeds = PROTOCOL.speeds.flatMap((s) => Array(PROTOCOL.trialsPerSpeed).fill(s));
-  const plan = [];
-  for (let i = 0; i < PROTOCOL.practiceTrials; i++) {
-    plan.push({ kind: 'practice', n: i + 1, total: PROTOCOL.practiceTrials, hand: app.firstHand, speed: PROTOCOL.practiceSpeed, block: null });
-  }
-  plan.push({ kind: 'notice', text: 'real_start' });
-  const total = speeds.length * 2;
-  let n = 0;
-  shuffle(speeds).forEach((speed) => plan.push({ kind: 'real', n: ++n, total, hand: app.firstHand, speed, block: 0 }));
-  plan.push({ kind: 'rest', nextHand: other });
-  shuffle(speeds).forEach((speed) => plan.push({ kind: 'real', n: ++n, total, hand: other, speed, block: 1 }));
+  const { plan, speedOrder } = makePlan(PROTOCOL, app.firstHand);
   app.plan = plan;
+  app.speedOrder = speedOrder;
 }
 
 function runNext() {
@@ -498,7 +480,7 @@ function queueSession() {
     edinburgh: app.edinburgh,
     edinburgh_lq: edinburghLQ(),
     first_hand: app.firstHand,
-    device: deviceInfo(),
+    device: { ...deviceInfo(), speed_order: app.speedOrder },
   });
 }
 
