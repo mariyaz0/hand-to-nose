@@ -22,7 +22,7 @@ Author: Mariya Zastenskaya.
 | Part | State |
 |---|---|
 | Protocol and decisions | done — [docs/protocol.md](docs/protocol.md), [docs/decisions.md](docs/decisions.md) |
-| Database (Supabase) | done — [schema](supabase/migrations/20261111000000_initial_schema.sql), [data format](docs/data_format.md) |
+| Database (Supabase) | done — [schema](supabase/migrations/20261110231615_initial_schema.sql), [data format](docs/data_format.md) |
 | Web app: data collection | v2.0 ready for the first real test — [web/](web/) |
 | Analysis and classifier | after the data |
 | Web app: test mode | after the classifier |

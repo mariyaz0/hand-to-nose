@@ -45,14 +45,16 @@ classifier must work for all of them.
 4. Permission for the motion sensors (needed on iPhone).
 5. Explanation: an animated diagram of the movement, then 2 practice trials at normal
    speed with the hand of block 1 (not saved).
-6. **Block 1:** 6 trials with one hand — 2 slow, 2 normal, 2 fast, in random order.
+6. **Block 1:** 6 trials with one hand — the three speeds in pairs, e.g. slow, slow,
+   fast, fast, normal, normal. The order of the speeds is random for each person.
 7. Rest: a 10 s countdown that names the next hand; then a "Switch hand" card, and the app
    waits until the phone is held still and upright again.
-8. **Block 2:** 6 trials with the other hand, the same way.
+8. **Block 2:** 6 trials with the other hand, with the **same order of speeds** as block 1.
 9. Thank-you screen.
 
 Which hand comes first is random. The app shows the hand and the speed in large letters
-before every trial. Speed guide: fast ≈ under 1 s, normal ≈ 1–2 s, slow ≈ 3–4 s.
+before every trial; a new hand or speed is also announced in the centre of the screen
+(3 times per hand). Speed guide: fast ≈ under 1 s, normal ≈ 1–2 s, slow ≈ 3–4 s.
 
 Each trial is uploaded right after it is recorded, so a closed tab does not lose the
 trials already done.

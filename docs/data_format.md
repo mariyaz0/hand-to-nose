@@ -1,7 +1,7 @@
 # Data format (v2, web app)
 
 Data are stored in Supabase (project `hand-to-nose`, region eu-central-1).
-Schema: [`supabase/migrations/20261111000000_initial_schema.sql`](../supabase/migrations/20261111000000_initial_schema.sql).
+Schema: [`supabase/migrations/`](../supabase/migrations/) (initial schema; pilot flag `is_pilot` / `pilot_note`).
 
 ## Access model
 
@@ -30,7 +30,8 @@ Verified on 2026-11-11: anon insert works; anon select is denied; a trial for an
 | `edinburgh` | short Edinburgh Handedness Inventory answers: writing, throwing, toothbrush, spoon; each −100 (always left), −50, 0, 50, 100 (always right) |
 | `edinburgh_lq` | laterality quotient = mean of the four answers |
 | `first_hand` | which hand the app asked for in block 1 (chosen at random) |
-| `device` | user agent, platform, screen size, pixel ratio, touch-zone radius, sensor availability |
+| `device` | user agent, platform, screen size, pixel ratio, touch-zone radius, sensor availability; from 2.2.0 also `speed_order` (e.g. `["slow","fast","normal"]`) |
+| `is_pilot`, `pilot_note` | test run: kept in the database but **excluded from the analysis**; set only by the researcher (the browser cannot write these columns) |
 
 ## `trials` — one successful movement (to the nose and back)
 
