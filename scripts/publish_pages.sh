@@ -7,15 +7,16 @@ src_rev=$(git rev-parse --short HEAD)
 tmp=$(mktemp -d)
 trap 'git worktree remove --force "$tmp" >/dev/null 2>&1 || true' EXIT
 
-git fetch -q origin gh-pages 2>/dev/null || true
+git fetch -q origin gh-pages:refs/remotes/origin/gh-pages 2>/dev/null || true
 if git show-ref -q --verify refs/remotes/origin/gh-pages; then
   git worktree add -q -B gh-pages "$tmp" origin/gh-pages
 else
   git worktree add -q --detach "$tmp"
   git -C "$tmp" checkout -q --orphan gh-pages
 fi
-git -C "$tmp" rm -rq --ignore-unmatch . >/dev/null
-rsync -a --exclude tests web/ "$tmp"/
+git -C "$tmp" rm -rqf --ignore-unmatch . >/dev/null
+git -C "$tmp" clean -fdxq
+(cd web && tar --exclude=./tests -cf - .) | (cd "$tmp" && tar -xf -)
 touch "$tmp/.nojekyll"
 git -C "$tmp" add -A
 if git -C "$tmp" diff --cached --quiet; then
