@@ -1,6 +1,6 @@
 // Settings of the data-collection app. Everything that may need tuning is here.
 
-export const APP_VERSION = '2.1.0';
+export const APP_VERSION = '2.2.0';
 
 // Supabase: the publishable key is public by design. The database only allows
 // inserting rows (see supabase/migrations/), so the key cannot be used to read data.
@@ -9,7 +9,7 @@ export const SUPABASE_KEY = 'sb_publishable_rJVA8mnGTtjF4D8V3NOeqA_lRLBMnYl';
 
 // Protocol (docs/protocol.md)
 export const PROTOCOL = {
-  trialsPerSpeed: 2,                 // per hand: 2 slow + 2 normal + 2 fast = 6
+  trialsPerSpeed: 2,                 // per hand: 3 speeds x 2 in a row = 6 (order random, same for both hands)
   speeds: ['slow', 'normal', 'fast'],
   practiceTrials: 2,                 // not saved
   practiceSpeed: 'normal',
