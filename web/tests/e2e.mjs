@@ -149,7 +149,11 @@ while (Date.now() - t0 < 300000) {
     rest: !document.getElementById('s-rest').hidden,
     cls: document.getElementById('s-trial').className,
     status: document.getElementById('tr-status').textContent,
+    ov: document.getElementById('tr-overlay').hidden ? '' : document.getElementById('tr-overlay').className,
   }));
+  for (const k of ['ov-hand', 'ov-info', 'ov-error', 'ov-notice']) {
+    if (st.ov.includes(k) && !shotsTaken.has(k)) { shotsTaken.add(k); await shot(`${lang}-overlay-${k.slice(3)}`); }
+  }
   if (st.rest && !shotsTaken.has('rest')) { shotsTaken.add('rest'); await shot(`${lang}-09-rest`); }
   if (st.cls.includes('st-fail') && !shotsTaken.has('fail')) { shotsTaken.add('fail'); await shot(`${lang}-08-trial-fail`); }
   if (st.cls.includes('st-ok') && !shotsTaken.has('ok')) { shotsTaken.add('ok'); await shot(`${lang}-07-trial-recorded`); }

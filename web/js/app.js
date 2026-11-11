@@ -264,11 +264,11 @@ function runNext() {
 
   if (item.kind === 'notice') {
     setTrialLook('st-ok');
-    $('tr-status').textContent = t(item.text);
-    // show the next trial's hand and speed already
-    const next = app.plan[app.pos + 1];
-    if (next) renderTrialLabels(next);
-    setTimeout(() => { app.pos++; runNext(); }, 3500);
+    $('tr-status').textContent = '';
+    showOverlay('notice', { title: '', main: t('ov_practice_done'), sub: t('ov_real_start') }, UI.noticeShowMs, () => {
+      app.pos++;
+      runNext();
+    });
     return;
   }
   if (item.kind === 'rest') { startRest(item); return; }
@@ -278,7 +278,60 @@ function runNext() {
   placeZone();
   if (item.kind === 'real' && !app.sessionQueued) queueSession();
   renderTrialLabels(item);
+
+  // Announce a new hand or a new speed in the centre before the trial starts
+  // (once per trial: not again after a failed attempt).
+  const prev = app.lastAnnounced;
+  const handChanged = !prev || prev.hand !== item.hand;
+  const speedChanged = !prev || prev.speed !== item.speed;
+  if (!item.announced && (handChanged || speedChanged)) {
+    item.announced = true;
+    app.lastAnnounced = item;
+    setTrialLook('st-wait');
+    $('tr-status').textContent = '';
+    const speedLine = `${t(`speed_${item.speed}`)} · ${t(`speed_${item.speed}_hint`)}`;
+    if (handChanged) {
+      showOverlay('hand', {
+        title: prev ? t('ov_switch_hand') : t('ov_get_ready'),
+        main: t(`hand_${item.hand}`),
+        sub: speedLine,
+      }, UI.handChangeShowMs, () => startTrial());
+    } else {
+      showOverlay('info', {
+        title: t('ov_new_speed'),
+        main: t(`speed_${item.speed}`).toUpperCase(),
+        sub: t(`speed_${item.speed}_hint`),
+        extra: t(`hand_plain_${item.hand}`),
+      }, UI.speedChangeShowMs, () => startTrial());
+    }
+    return;
+  }
+  item.announced = true;
+  app.lastAnnounced = item;
+  startTrial();
+}
+
+function startTrial() {
   runner.start(performance.now());
+}
+
+/** Dimmed screen with a card in the centre for `ms`, then `then()`. */
+function showOverlay(kind, { title = '', main = '', sub = '', extra = '' }, ms, then) {
+  const ov = $('tr-overlay');
+  ov.className = `overlay ov-${kind}`;
+  $('ov-title').textContent = title;
+  $('ov-main').textContent = main;
+  $('ov-sub').textContent = sub;
+  $('ov-extra').textContent = extra;
+  ov.hidden = false;
+  setTimeout(() => {
+    ov.hidden = true;
+    then?.();
+  }, ms);
+}
+
+function vibrate() {
+  try { navigator.vibrate?.(UI.vibrateMs); } catch { /* not supported (iPhone) */ }
 }
 
 function placeZone() {
@@ -345,8 +398,14 @@ function trialDone(result) {
 function trialFailed(reason) {
   if (app.current?.kind === 'real') app.failedBefore.push(reason);
   setTrialLook('st-fail');
-  $('tr-status').textContent = t(`fail_${reason}`);
-  setTimeout(() => {
+  $('tr-status').textContent = '';
+  vibrate();
+  showOverlay('error', {
+    title: t('ov_error'),
+    main: t(`err_${reason}_title`),
+    sub: t(`err_${reason}_text`),
+    extra: t('ov_repeat'),
+  }, UI.failShowMs, () => {
     if (document.hidden) {
       // wait until the page is visible again
       document.addEventListener('visibilitychange', function again() {
@@ -355,7 +414,7 @@ function trialFailed(reason) {
     } else {
       runNext();
     }
-  }, UI.failShowMs);
+  });
 }
 
 function initTouches() {
@@ -396,7 +455,6 @@ function startRest(item) {
       clearInterval(timer);
       app.pos++;
       runNext();
-      $('tr-status').textContent = t('rest_go', { hand: t(`hand_acc_${item.nextHand}`) });
     }
   }, 1000);
 }

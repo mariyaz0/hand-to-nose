@@ -33,7 +33,8 @@ function rng(seed) {
  *   untilMs     simulation length
  */
 function simulate(behaviour = {}) {
-  const b = { rtMs: 350, moveMs: 1200, holdMs: 250, touch: 'zone', earlyMoveAt: null, flat: false, gyro: true, untilMs: 20000, ...behaviour };
+  const b = { rtMs: 350, moveMs: 1200, holdMs: 250, touch: 'zone', earlyMoveAt: null, flat: false, gyro: true, untilMs: 20000,
+    gyroAmp: 90, accAmp: 4, noiseGyro: 2, noiseAcc: 0.05, ...behaviour };
   const rand = rng(42);
   const noise = (a) => (rand() - 0.5) * 2 * a;
   const buffer = new SampleBuffer();
@@ -77,15 +78,16 @@ function simulate(behaviour = {}) {
   for (now = 0; now <= b.untilMs && (!started || runner.active); now += dt) {
     if (!started && now >= warmupMs) { runner.start(now); started = true; }
     // sample
-    let ax = noise(0.05), ay = 9.81 + noise(0.05), az = 0.4 + noise(0.05);
-    if (b.flat) { ay = 0.3 + noise(0.05); az = 9.81 + noise(0.05); }
-    let gx = noise(2), gy = noise(2), gz = noise(2);
+    const na = b.noiseAcc, ng = b.noiseGyro;
+    let ax = noise(na), ay = 9.81 + noise(na), az = 0.4 + noise(na);
+    if (b.flat) { ay = 0.3 + noise(na); az = 9.81 + noise(na); }
+    let gx = noise(ng), gy = noise(ng), gz = noise(ng);
     for (const m of moves) {
       const u = (now - m.t0) / m.dur;
       if (u >= 0 && u <= 1) {
-        az += m.sign * 4 * Math.sin(2 * Math.PI * u);  // push towards the face, then brake
-        ay += 1.5 * Math.sin(Math.PI * u);
-        gx += m.sign * 90 * Math.sin(Math.PI * u);      // forearm rotation while the elbow bends
+        az += m.sign * b.accAmp * Math.sin(2 * Math.PI * u);          // push towards the face, then brake
+        ay += (b.accAmp * 3 / 8) * Math.sin(Math.PI * u);
+        gx += m.sign * b.gyroAmp * Math.sin(Math.PI * u);             // forearm rotation while the elbow bends
       }
     }
     const s = { t: now, ax, ay, az, lx: null, ly: null, lz: null, gx: b.gyro ? gx : null, gy: b.gyro ? gy : null, gz: b.gyro ? gz : null, oa: null, ob: null, og: null };
@@ -185,3 +187,20 @@ test('stillness needs enough samples in the window', () => {
   const st = windowStats(buffer, 1000, 1000, 60);
   assert.equal(isStill(st, DETECT), false, '6 samples in 1 s is too few');
 });
+
+// Values below come from the first real recording (S24 Ultra, 11 Nov 2026):
+// real movements rotated the phone at 31-99 deg/s, slow ones changed |a| by < 1 m/s^2;
+// holding still: rotation up to ~13 deg/s, | |a| - g | up to ~0.4 m/s^2.
+
+test('a slow early movement like the real ones (35 deg/s, small |a| change) is caught', () => {
+  const { failReason, tBeep } = simulate({ earlyMoveAt: 3000, moveMs: 3000, gyroAmp: 35, accAmp: 0.5 });
+  assert.equal(failReason, 'false_start');
+  assert.equal(tBeep, null);
+});
+
+test('hand tremor at the level of the real recording is not an error', () => {
+  const { result, failReason } = simulate({ noiseGyro: 8, noiseAcc: 0.15, gyroAmp: 40, accAmp: 0.6 });
+  assert.equal(failReason, null);
+  assert.ok(result);
+});
+
