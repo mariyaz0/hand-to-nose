@@ -22,3 +22,7 @@ Decisions about the archived v0.1 Android app are not repeated here.
 | D-15 | 10 Nov | Analysis: explicit features + a simple model (logistic regression / decision tree), tested leave-one-subject-out. A small neural network only for comparison. | 10–30 participants expected; the result should be explainable. |
 | D-16 | 11 Nov | **Storage: Supabase.** The browser may only insert data; it cannot read, change or delete it. A trial can be added only to an existing session younger than 3 hours. | Data from many phones in one place, safe even though the link is public. |
 | D-17 | 11 Nov | Participant data never go into git. | Privacy. |
+| D-18 | 11 Nov | A trial starts only when the phone is **still and upright** for 1 s. | A phone lying on a table must not start a trial (e.g. during the rest). |
+| D-19 | 11 Nov | Detection thresholds (stillness, movement before the beep) are first guesses, kept in `web/js/config.js`; check them on the first real recordings with `?debug=1`. | No real web recordings yet. |
+| D-20 | 11 Nov | Practice: 2 trials at normal speed with the hand of block 1. Rest between blocks: 20 s countdown, then automatic start. | Only one button ("Start practice") during the task. |
+| D-21 | 11 Nov | Web app in plain HTML/CSS/JavaScript (no framework, no build step), published on GitHub Pages from the `gh-pages` branch. | Simple to read and to change; nothing to install. |

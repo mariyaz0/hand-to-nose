@@ -51,16 +51,29 @@ Failed attempts (moved before the high beep, or no nose touch within 10 s) are *
 | `samples` | raw sensor data, columnar JSON (below) |
 | `predicted_hand`, `predicted_prob`, `model_version` | test mode only |
 
-All times are in milliseconds on the same clock as `samples.t`.
+All times are in milliseconds, relative to the first sample of the trial (`samples.t[0] = 0`).
+Sensor, touch and beep times come from the same browser clock (`performance.now()` / `event.timeStamp`).
+The beep time is the moment the sound was requested; the real sound comes out a few tens of ms
+later (`sessions.device.audio.output_latency_s`).
 
 ### `samples` (columnar arrays of equal length)
 
 | Key | Source (browser API) | Unit |
 |---|---|---|
 | `t` | event timestamp | ms |
-| `ax`, `ay`, `az` | `DeviceMotionEvent.accelerationIncludingGravity` | m/s² |
-| `lx`, `ly`, `lz` | `DeviceMotionEvent.acceleration` (without gravity; may be null on some devices) | m/s² |
-| `gx`, `gy`, `gz` | `DeviceMotionEvent.rotationRate` (alpha, beta, gamma) | deg/s |
-| `oa`, `ob`, `og` | `DeviceOrientationEvent` (alpha, beta, gamma) | deg |
+| `ax`, `ay`, `az` | `DeviceMotionEvent.accelerationIncludingGravity` x, y, z | m/s² |
+| `lx`, `ly`, `lz` | `DeviceMotionEvent.acceleration` x, y, z (without gravity; may be null on some devices) | m/s² |
+| `gx`, `gy`, `gz` | `DeviceMotionEvent.rotationRate`: `gx` = beta (about x), `gy` = gamma (about y), `gz` = alpha (about z) | deg/s |
+| `oa`, `ob`, `og` | `DeviceOrientationEvent` alpha, beta, gamma (last value before the sample) | deg |
 
-The recording of a trial covers the still period before the high beep, the movement to the nose, the touch, the way back and the still period after it.
+Phone axes (portrait, screen facing the person): x to the right, y up, z out of the screen
+(towards the face). With the phone upright and still, `ay` ≈ +9.8 on Android. Some iPhones report
+the opposite sign; the analysis checks the sign from the still period.
+
+A trial recording starts 1 s before the still window that precedes the high beep and ends 0.5 s
+after the phone is still again: still → pause (2 s) → high beep → movement to the nose → touch
+(low beep) → way back → still.
+
+`touch_events` items: `{type: "down"|"up"|"cancel", id, t, x, y, in_zone, state}`; `x`, `y` in CSS px
+relative to the dot centre; `state` = trial state at that moment. The zone radius and the screen
+size are in `sessions.device`.

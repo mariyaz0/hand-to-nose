@@ -5,7 +5,8 @@
 1. **Start position.** The phone is upright (portrait) and lies in the palm: the palm is
    behind the phone, the fingers are on its sides. The screen faces the person. The arm
    is fully extended forward, and the dot in the centre of the screen is in front of the nose.
-2. The phone is still → after a fixed pause of **2 s** a **high beep** sounds.
+2. The phone is still and upright for 1 s → after a fixed pause of **2 s** a **high beep**
+   sounds. (Upright: a phone lying on a table does not start a trial.)
 3. The person bends the elbow and brings the phone to the face at the instructed speed.
 4. The nose touches the screen inside the zone around the dot (a circle of about 2–3 cm).
    At the moment of the touch a **low beep** sounds. Touches outside the zone (for
@@ -33,10 +34,11 @@ classifier must work for all of them.
 3. Questionnaire: age, sex, short Edinburgh Handedness Inventory (writing, throwing,
    toothbrush, spoon).
 4. Permission for the motion sensors (needed on iPhone).
-5. Explanation: an animated diagram of the movement, then 1–2 practice trials
-   (not saved).
+5. Explanation: an animated diagram of the movement, then 2 practice trials at normal
+   speed with the hand of block 1 (not saved).
 6. **Block 1:** 6 trials with one hand — 2 slow, 2 normal, 2 fast, in random order.
-7. Rest.
+7. Rest: a 20 s countdown that names the next hand; then the app waits until the phone is
+   held still and upright again.
 8. **Block 2:** 6 trials with the other hand, the same way.
 9. Thank-you screen.
 
