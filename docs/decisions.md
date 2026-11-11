@@ -26,3 +26,9 @@ Decisions about the archived v0.1 Android app are not repeated here.
 | D-19 | 11 Nov | Detection thresholds (stillness, movement before the beep) are first guesses, kept in `web/js/config.js`; check them on the first real recordings with `?debug=1`. | No real web recordings yet. |
 | D-20 | 11 Nov | Practice: 2 trials at normal speed with the hand of block 1. Rest between blocks: 20 s countdown, then automatic start. | Only one button ("Start practice") during the task. |
 | D-21 | 11 Nov | Web app in plain HTML/CSS/JavaScript (no framework, no build step), published on GitHub Pages from the `gh-pages` branch. | Simple to read and to change; nothing to install. |
+| D-22 | 11 Nov | **Pilot run** on the S24 Ultra (session `B34CF91D`, app 2.0.0): 12 trials, 60 Hz, every nose touch inside the zone, 2 attempts discarded as too early. Kept in the database but marked as a pilot (excluded from the analysis). App version raised to 2.1.0. | First real test of the web app. |
+| D-23 | 11 Nov | A **new hand or speed is announced** in the centre of the darkened screen before the trial (speed name + seconds). | In the pilot, speed changes were not noticed: "fast" and "slow" trials took similar times. |
+| D-24 | 11 Nov | **Every error**: short vibration + a centred card with the reason ("Too early", "No nose touch", "Interrupted"). | In the pilot it was unclear what had happened after an error. |
+| D-25 | 11 Nov | Rest between the hands: **10 s** (was 20 s). | Pilot feedback. |
+| D-26 | 11 Nov | Thresholds tuned on the pilot: stillness gyro RMS 15 → **10** deg/s, SD of \|a\| 0.5 → **0.25** m/s²; movement before the beep gyro 45 → **20** deg/s, \|a\| change 1.5 → **1.0** m/s². | Pilot: still = 2–6 deg/s, 0.06–0.10 m/s²; pause noise ≤ 13 deg/s, ≤ 0.43 m/s²; real movements always > 20 deg/s but often < 45 deg/s and < 1 m/s² → the old values would miss an early slow movement (now a test case). |
+

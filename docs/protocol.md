@@ -15,14 +15,23 @@
 6. When the phone is still again, the screen shows "Recorded ✓" and the progress
    (e.g. "3 of 12"). The next trial starts automatically.
 
+Before a trial with a **new hand or a new speed**, the screen darkens and a card in the centre
+shows it for 2.5 s (hand change: 3 s), e.g. "NEW SPEED — FAST — under 1 s — Right hand".
+The trial starts only after the card disappears.
+
 Beeps: high 1000 Hz, low 600 Hz, 120 ms each (the same as in v0.1).
 
 ### Failed attempts
 
 | Problem | What happens |
 |---|---|
-| The phone moved before the high beep | attempt discarded, message with the reason, the trial is repeated |
-| No nose touch within 10 s after the high beep | attempt discarded, message with the reason, the trial is repeated |
+| The phone moved before the high beep | attempt discarded, the trial is repeated |
+| No nose touch within 10 s after the high beep | attempt discarded, the trial is repeated |
+| The app went to the background | attempt discarded, the trial is repeated |
+
+Every error: a short vibration (250 ms; Android only, iPhone browsers cannot vibrate) and a
+card in the centre of the darkened screen with the reason, e.g. "NOT COUNTED — Too early —
+You started moving before the high beep…", shown for 3.5 s.
 
 The duration of the movement is not filtered: people move at different speeds, and the
 classifier must work for all of them.
@@ -37,8 +46,8 @@ classifier must work for all of them.
 5. Explanation: an animated diagram of the movement, then 2 practice trials at normal
    speed with the hand of block 1 (not saved).
 6. **Block 1:** 6 trials with one hand — 2 slow, 2 normal, 2 fast, in random order.
-7. Rest: a 20 s countdown that names the next hand; then the app waits until the phone is
-   held still and upright again.
+7. Rest: a 10 s countdown that names the next hand; then a "Switch hand" card, and the app
+   waits until the phone is held still and upright again.
 8. **Block 2:** 6 trials with the other hand, the same way.
 9. Thank-you screen.
 
