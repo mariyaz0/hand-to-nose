@@ -15,3 +15,7 @@ __pycache__/
 .env.*
 
 .DS_Store
+
+# Node / test output
+node_modules/
+e2e-output/

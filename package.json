@@ -1,0 +1,14 @@
+{
+  "name": "hand-to-nose",
+  "private": true,
+  "type": "module",
+  "description": "Which hand made the movement? Data-collection web app and analysis.",
+  "scripts": {
+    "test": "node --test web/tests/*.test.js",
+    "serve": "python3 -m http.server 8000 --directory web",
+    "test:e2e": "node web/tests/e2e.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^23.0.0"
+  }
+}
