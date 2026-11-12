@@ -40,7 +40,7 @@ classifier must work for all of them.
 
 1. Language: English by default; switch to Russian in the top-right corner.
 2. Short consent screen. No names are collected; each session gets a random code.
-3. Questionnaire: age, sex, short Edinburgh Handedness Inventory (writing, throwing,
+3. Questionnaire: age, gender (male / female), short Edinburgh Handedness Inventory (writing, throwing,
    toothbrush, spoon).
 4. Permission for the motion sensors (needed on iPhone).
 5. Explanation: an animated diagram of the movement, then 2 practice trials at normal

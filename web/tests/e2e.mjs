@@ -115,7 +115,7 @@ await shot(`${lang}-02-consent`);
 await page.click('#consent-box');
 await page.click('#btn-consent');
 await page.type('#age', '27');
-await page.click('input[name="sex"][value="female"] + span');
+await page.click('input[name="gender"][value="female"] + span');
 for (const item of ['writing', 'throwing', 'toothbrush', 'spoon']) {
   await page.click(`input[name="ed-${item}"][value="${item === 'throwing' ? 50 : 100}"] + span`);
 }
