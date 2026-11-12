@@ -23,7 +23,7 @@ const SCORE_KEY = { '-100': 'ed_m100', '-50': 'ed_m50', 0: 'ed_0', 50: 'ed_50', 
 const app = {
   sessionId: uuid(),
   age: null,
-  sex: null,
+  gender: null,
   edinburgh: {},
   firstHand: Math.random() < 0.5 ? 'right' : 'left',
   sensorPermission: null,
@@ -161,14 +161,14 @@ function initQuestions() {
     ed.append(wrap);
   }
   $('age').addEventListener('input', checkQuestions);
-  document.querySelectorAll('input[name="sex"]').forEach((r) => r.addEventListener('change', () => { app.sex = r.value; checkQuestions(); }));
+  document.querySelectorAll('input[name="gender"]').forEach((r) => r.addEventListener('change', () => { app.gender = r.value; checkQuestions(); }));
   $('btn-questions').addEventListener('click', () => show('s-setup'));
 }
 
 function checkQuestions() {
   const age = Number($('age').value);
   app.age = Number.isInteger(age) && age >= 10 && age <= 110 ? age : null;
-  const ok = app.age != null && app.sex != null && EDINBURGH_ITEMS.every((i) => app.edinburgh[i] != null);
+  const ok = app.age != null && app.gender != null && EDINBURGH_ITEMS.every((i) => app.edinburgh[i] != null);
   $('btn-questions').disabled = !ok;
 }
 
@@ -476,7 +476,7 @@ function queueSession() {
     language: getLang(),
     consent_given: true,
     age: app.age,
-    sex: app.sex,
+    sex: app.gender, // database column `sex` holds the answer to the Gender question (D-37)
     edinburgh: app.edinburgh,
     edinburgh_lq: edinburghLQ(),
     first_hand: app.firstHand,
