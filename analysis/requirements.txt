@@ -1,0 +1,10 @@
+# Python packages for the analysis (export + notebooks).
+# Install:  pip install -r analysis/requirements.txt
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.7
+requests>=2.28
+python-dotenv>=1.0
+# Jupyter: JupyterLab in the browser, or just ipykernel when using VS Code
+jupyterlab>=4.0
+ipykernel>=6.0

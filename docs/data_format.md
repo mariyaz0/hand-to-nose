@@ -9,7 +9,7 @@ Schema: [`supabase/migrations/`](../supabase/migrations/) (initial schema; pilot
 |---|---|
 | Browser (publishable key, role `anon`) | **insert only** into `sessions` and `trials` |
 | Browser | cannot read, update or delete anything |
-| Analysis (service key / dashboard) | read everything |
+| Analysis (secret key in `.env` → `analysis/export_data.py`, or the dashboard) | read everything |
 
 Extra guards:
 - a collection session cannot be stored without consent;
@@ -73,8 +73,20 @@ Phone axes (portrait, screen facing the person): x to the right, y up, z out of 
 **iPhone (Safari) reports `accelerationIncludingGravity` with the opposite sign**: at rest
 `ay` ≈ −9.6 and `az` has the opposite sign too (sessions F50F9F36, A56549CD vs B34CF91D, 11 Nov 2026).
 The app only uses magnitudes, so detection is not affected, but the analysis must flip the
-acceleration axes for iPhone sessions (`sessions.device.user_agent` contains "iPhone") before
-comparing left and right. The sign of `rotationRate` on iPhone vs Android still has to be checked.
+acceleration axes for iPhone sessions (`sessions.device.platform` = `iPhone`) before
+comparing left and right. **`acceleration` (without gravity) has the same opposite sign on iPhone**:
+there, `a` (with gravity) − `l` (without gravity) is exactly the gravity vector (spread of its
+magnitude 0.00 m/s² in A56549CD), which is only true if both are flipped. `analysis/loading.py` flips
+`ax…az` and `lx…lz` for iPhone sessions. The sign of `rotationRate` on iPhone vs Android is still not
+known: a first check (rotation rate vs the change of the gravity direction) was inconclusive because
+the rotations in this task are small.
+
+**Repeated readings on the Samsung (Samsung Internet).** In the Android pilots 15–18 % of the samples
+repeat the previous acceleration reading exactly (all three values) and 11–13 % the previous rotation
+reading; on the iPhones about 0 %. The browser sometimes delivers the same sensor reading twice, so
+the real sampling rate on that phone is below the nominal 60 Hz. `trials_table()` in
+`analysis/loading.py` reports per trial the share of samples where all six values repeat
+(`repeated_share`).
 
 A trial recording starts 1 s before the still window that precedes the high beep and ends 0.5 s
 after the phone is still again: still → pause (2 s) → high beep → movement to the nose → touch

@@ -23,8 +23,9 @@ Author: Mariya Zastenskaya.
 |---|---|
 | Protocol and decisions | done — [docs/protocol.md](docs/protocol.md), [docs/decisions.md](docs/decisions.md) |
 | Database (Supabase) | done — [schema](supabase/migrations/20261110231615_initial_schema.sql), [data format](docs/data_format.md) |
-| Web app: data collection | v2.0 ready for the first real test — [web/](web/) |
-| Analysis and classifier | after the data |
+| Web app: data collection | v2.2 — [web/](web/) |
+| Looking at the data | export + overview notebook — [analysis/](analysis/), [notebooks/](notebooks/) |
+| Features and classifier | after the data |
 | Web app: test mode | after the classifier |
 
 ## Web app
@@ -48,10 +49,33 @@ A whole simulated session in headless Chrome (fake sensors and touches, database
 intercepted): `npm install`, `npm run serve`, then `npm run test:e2e`.
 Publish: `scripts/publish_pages.sh` (copies `web/` to the `gh-pages` branch).
 
+## Looking at the data
+
+The recordings are in Supabase: table `sessions` (one row per person) and table `trials`
+(one row per movement). The raw sensor data of a movement are in the JSON field
+`trials.samples` (arrays `t`, `ax ay az`, `lx ly lz`, `gx gy gz`, `oa ob og`), see
+[docs/data_format.md](docs/data_format.md).
+
+1. `pip install -r analysis/requirements.txt`
+2. Create `.env` in the repository root with `SUPABASE_SECRET_KEY=sb_secret_...`
+   (Supabase → Project Settings → API Keys). `.env` is ignored by git.
+3. `python analysis/export_data.py` → `data/raw/` (ignored by git).
+4. Open [notebooks/01_data_overview.ipynb](notebooks/01_data_overview.ipynb) (VS Code or
+   `jupyter lab`) and run all cells.
+
+| File | What it does |
+|---|---|
+| `analysis/export_data.py` | downloads all sessions and trials from Supabase into `data/raw/` |
+| `analysis/loading.py` | turns the export into pandas tables: sessions → trials → samples; flips iPhone acceleration |
+| `analysis/plots.py` | plots used by the notebooks |
+| `notebooks/01_data_overview.ipynb` | what is recorded, where, how it looks; right vs left hand |
+
 ## Repository
 
 ```
 web/         data-collection web app
+analysis/    export from Supabase, loading into pandas, plots
+notebooks/   Jupyter notebooks (looking at the data, later features and model)
 docs/        protocol, decision log, data format
 supabase/    database schema (SQL migrations)
 scripts/     publishing
@@ -61,4 +85,6 @@ archive/     earlier versions (v0.1 Android app)
 ## Data and privacy
 
 No names are collected; each session has a random code. The web page can only add data
-to the database; it cannot read it. Raw recordings are not stored in this repository.
+to the database; it cannot read it. Raw recordings and the secret key are not stored in this
+repository (`data/` and `.env` are in `.gitignore`); the notebooks show participants only in
+aggregate.
