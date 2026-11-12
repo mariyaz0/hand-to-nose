@@ -8,7 +8,7 @@
 // Failures: moved during the pause (false_start), no touch within 10 s (no_touch),
 // app sent to the background (interrupted).
 
-import { windowStats, isStill, MoveDetector, toColumns } from './motion.js';
+import { windowStats, isStill, MoveDetector, toColumns } from './motion.js?v=2488eb3';
 
 export const STATE = {
   IDLE: 'idle',

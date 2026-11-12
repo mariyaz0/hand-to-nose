@@ -1,15 +1,15 @@
 // Data-collection app: screens, the plan of trials and the connection between
 // sensors, the trial state machine, the beeps and the upload.
 
-import { APP_VERSION, PROTOCOL, DETECT, UI } from './config.js';
-import { t, setLang, getLang, onLangChange, initialLang } from './i18n.js';
-import { Beeper } from './audio.js';
-import { Sensors, requestSensorPermission } from './sensors.js';
-import { SampleBuffer, windowStats } from './motion.js';
-import { TrialRunner, STATE } from './trial.js';
-import { Uploader } from './db.js';
-import { createDemo } from './demo.js';
-import { buildPlan as makePlan } from './plan.js';
+import { APP_VERSION, PROTOCOL, DETECT, UI } from './config.js?v=2488eb3';
+import { t, setLang, getLang, onLangChange, initialLang } from './i18n.js?v=2488eb3';
+import { Beeper } from './audio.js?v=2488eb3';
+import { Sensors, requestSensorPermission } from './sensors.js?v=2488eb3';
+import { SampleBuffer, windowStats } from './motion.js?v=2488eb3';
+import { TrialRunner, STATE } from './trial.js?v=2488eb3';
+import { Uploader } from './db.js?v=2488eb3';
+import { createDemo } from './demo.js?v=2488eb3';
+import { buildPlan as makePlan } from './plan.js?v=2488eb3';
 
 const $ = (id) => document.getElementById(id);
 const DEBUG = new URLSearchParams(location.search).has('debug');

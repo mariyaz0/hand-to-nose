@@ -2,7 +2,7 @@
 // before its trials) and are retried until they succeed, so a short loss of
 // connection does not lose data.
 
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=2488eb3';
 
 async function insert(table, row) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
