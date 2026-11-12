@@ -26,7 +26,7 @@ Verified on 2026-11-11: anon insert works; anon select is denied; a trial for an
 | `mode` | `collect` (data collection) or `test` (final exam) |
 | `language` | `en` / `ru` |
 | `consent_given` | must be true in `collect` mode |
-| `age`, `sex` | questionnaire; from app 2.2.1 `sex` holds the answer to the "Gender" question, `male` or `female` only (D-37) |
+| `age`, `sex` | questionnaire; from app 2.2.1 `sex` holds the answer to the "Gender" question (Russian: "Пол"), `male` or `female` only (D-37) |
 | `edinburgh` | short Edinburgh Handedness Inventory answers: writing, throwing, toothbrush, spoon; each −100 (always left), −50, 0, 50, 100 (always right) |
 | `edinburgh_lq` | laterality quotient = mean of the four answers |
 | `first_hand` | which hand the app asked for in block 1 (chosen at random) |

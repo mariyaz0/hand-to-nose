@@ -1,6 +1,6 @@
 // Settings of the data-collection app. Everything that may need tuning is here.
 
-export const APP_VERSION = '2.2.1';
+export const APP_VERSION = '2.2.2';
 
 // Supabase: the publishable key is public by design. The database only allows
 // inserting rows (see supabase/migrations/), so the key cannot be used to read data.

@@ -47,7 +47,7 @@ Run locally: `npm run serve` → http://localhost:8000 (sensors need a phone; on
 use `?debug=1`). Tests of the trial logic on simulated movements: `npm test`.
 A whole simulated session in headless Chrome (fake sensors and touches, database calls
 intercepted): `npm install`, `npm run serve`, then `npm run test:e2e`.
-Publish: `scripts/publish_pages.sh` (copies `web/` to the `gh-pages` branch).
+Publish: `scripts/publish_pages.sh` (copies `web/` to the `gh-pages` branch and adds `?v=<commit>` to every CSS/JS address, so phones never mix cached old files with a new page).
 
 ## Looking at the data
 
