@@ -5,7 +5,7 @@ A web app that tells, from one movement, whether a person used the **right** or 
 the nose on a high beep, touches the screen with the nose (low beep) and moves the arm
 back. The phone's motion sensors record the movement. No camera and no names are used.
 
-Trial project for the Integrative Basal Ganglia lab (Prof. Izhar Bar-Gad), Bar-Ilan University.
+Trial project, Bar-Ilan University.
 Author: Mariya Zastenskaya.
 
 ## Plan

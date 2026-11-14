@@ -10,7 +10,7 @@ patient's difference between the hands is abnormal, we first need to know how la
 this difference is in healthy right- and left-handed people. This project is a first
 step towards measuring that with an ordinary phone.
 
-Trial project for the Integrative Basal Ganglia lab (Prof. Izhar Bar-Gad), Bar-Ilan University.
+Trial project, Bar-Ilan University.
 Author: Mariya Zastenskaya.
 
 ## Status
