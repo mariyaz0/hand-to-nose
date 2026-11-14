@@ -41,9 +41,9 @@ CHANNEL_LABELS = {
     "lx": "acc. x (no gravity), m/s²",
     "ly": "acc. y (no gravity), m/s²",
     "lz": "acc. z (no gravity), m/s²",
-    "gx": "rotation about x, deg/s",
-    "gy": "rotation about y, deg/s",
-    "gz": "rotation about z, deg/s",
+    "gx": "rotation about y (gx), deg/s",
+    "gy": "rotation about z (gy), deg/s",
+    "gz": "rotation about x (gz), deg/s",
     "oa": "orientation alpha, deg",
     "ob": "orientation beta, deg",
     "og": "orientation gamma, deg",
@@ -144,6 +144,7 @@ def sessions_table(raw_sessions: list[dict]) -> pd.DataFrame:
                 "browser": _browser(device.get("user_agent", "")),
                 "speed_order": ", ".join(device.get("speed_order") or []) or None,
                 "measured_rate_hz": sensors.get("measured_rate_hz"),
+                "has_rotation": sensors.get("has_rotation"),
             }
         )
     df = pd.DataFrame(rows)
@@ -259,8 +260,8 @@ def trial_samples(trial: dict, platform: str, flip_iphone: bool = True) -> pd.Da
 
     iPhone (Safari) reports both accelerations with the opposite sign to Android
     (docs/data_format.md); with flip_iphone=True they are flipped so that all phones use
-    the Android convention. The rotation rate is not changed: its sign on iPhone is not
-    checked yet.
+    the Android convention. The rotation rate is not changed: it has the same sign on
+    iPhone and Android (D-51). Real axes: gz = about x, gx = about y, gy = about z.
     """
     smp = trial.get("samples") or {}
     df = pd.DataFrame({k: _as_float_array(smp[k]) for k in ["t"] + SENSOR_KEYS if k in smp})

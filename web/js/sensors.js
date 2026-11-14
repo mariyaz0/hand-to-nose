@@ -66,7 +66,9 @@ export class Sensors {
       t: e.timeStamp,
       ax: g.x, ay: g.y, az: g.z,
       lx: a?.x ?? null, ly: a?.y ?? null, lz: a?.z ?? null,
-      // rotationRate: alpha = about z, beta = about x, gamma = about y (deg/s)
+      // rotationRate in deg/s. Checked on the data (D-51): browsers report alpha about x,
+      // beta about y and gamma about z, so gz = about x, gx = about y, gy = about z.
+      // Column names kept as they are so that old and new data stay comparable.
       gx: r?.beta ?? null, gy: r?.gamma ?? null, gz: r?.alpha ?? null,
       oa: this.orientation.oa, ob: this.orientation.ob, og: this.orientation.og,
     };

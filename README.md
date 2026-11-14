@@ -25,7 +25,7 @@ Author: Mariya Zastenskaya.
 | Database (Supabase) | done — [schema](supabase/migrations/20261110231615_initial_schema.sql), [data format](docs/data_format.md) |
 | Web app: data collection | v2.2 — [web/](web/) |
 | Looking at the data | export + overview notebook — [analysis/](analysis/), [notebooks/](notebooks/) |
-| Features and classifier | after the data |
+| Features and classifier | first model: 94 % of reaches correct on unseen people (22 people, leave-one-subject-out) — [notebooks/02_hand_model.ipynb](notebooks/02_hand_model.ipynb) |
 | Web app: test mode | after the classifier |
 
 ## Web app
@@ -68,14 +68,17 @@ The recordings are in Supabase: table `sessions` (one row per person) and table 
 | `analysis/export_data.py` | downloads all sessions and trials from Supabase into `data/raw/` |
 | `analysis/loading.py` | turns the export into pandas tables: sessions → trials → samples; flips iPhone acceleration |
 | `analysis/plots.py` | plots used by the notebooks |
+| `analysis/features.py` | one reach (high beep → nose touch) → features; 50 Hz grid, smoothing, real rotation axes |
+| `analysis/model.py` | analysis rules, logistic regression, leave-one-subject-out test |
 | `notebooks/01_data_overview.ipynb` | what is recorded, where, how it looks; right vs left hand |
+| `notebooks/02_hand_model.ipynb` | features, the rules applied, test on unseen people, simpler versions |
 
 ## Repository
 
 ```
 web/         data-collection web app
-analysis/    export from Supabase, loading into pandas, plots
-notebooks/   Jupyter notebooks (looking at the data, later features and model)
+analysis/    export from Supabase, loading into pandas, plots, features, model
+notebooks/   Jupyter notebooks (looking at the data; features and model)
 docs/        protocol, decision log, data format
 supabase/    database schema (SQL migrations)
 scripts/     publishing
