@@ -322,7 +322,9 @@ def reach_profiles(samples: pd.DataFrame, channel: str, n_points: int = 101) -> 
     rows, index = [], []
     for trial_id, g in samples.groupby("trial_id", sort=False):
         g = g.dropna(subset=["u", channel])
-        if g["u"].min() > 0 or g["u"].max() < 1:
+        # Skip trials without this channel (phones without a gyroscope have no rotation rate)
+        # and trials whose samples do not cover the whole reach.
+        if len(g) < 2 or g["u"].min() > 0 or g["u"].max() < 1:
             continue
         rows.append(np.interp(grid, g["u"].to_numpy(), g[channel].to_numpy()))
         index.append(trial_id)
