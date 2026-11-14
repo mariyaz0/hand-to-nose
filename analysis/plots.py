@@ -150,7 +150,7 @@ def plot_reach_profiles(samples: pd.DataFrame, channels: list[str], ncols: int =
     nrows = int(np.ceil(len(channels) / ncols))
     fig, axes = plt.subplots(nrows, ncols, figsize=(3.4 * ncols, 2.6 * nrows), sharex=True,
                              squeeze=False)
-    counts = {}
+    counts, panel_counts = {}, {}
     for ax, ch in zip(axes.flat, channels):
         prof = reach_profiles(samples, ch)
         cols = [c for c in prof.columns if isinstance(c, (int, np.integer))]
@@ -167,14 +167,67 @@ def plot_reach_profiles(samples: pd.DataFrame, channels: list[str], ncols: int =
             if len(p):
                 ax.plot(grid, p.mean(axis=0), color=HAND_COLORS[hand], lw=2, zorder=3)
         ax.set_title(CHANNEL_LABELS.get(ch, ch), fontsize=9)
+        panel_counts[CHANNEL_LABELS.get(ch, ch)] = (counts["right"], counts["left"])
     for ax in axes.flat[len(channels):]:
         ax.set_visible(False)
     for ax in axes[-1]:
         ax.set_xlabel("0 = high beep, 1 = nose touch")
     handles = [plt.Line2D([], [], color=HAND_COLORS[h], lw=2) for h in ["right", "left"]]
-    fig.legend(handles, [f"{h} hand ({counts.get(h, 0)} movements)" for h in ["right", "left"]],
-               loc="upper right", ncols=2)
+    if len(set(panel_counts.values())) <= 1:
+        names = [f"{h} hand ({counts.get(h, 0)} movements)" for h in ["right", "left"]]
+    else:
+        # panels hold different numbers of movements (e.g. no rotation on phones without
+        # a gyroscope): give the numbers per panel instead
+        names = ["right hand", "left hand"]
+        for ax, (title, (n_r, n_l)) in zip(axes.flat, panel_counts.items()):
+            ax.set_title(f"{title}  ·  {n_r} / {n_l}", fontsize=9)
+    fig.legend(handles, names, loc="upper right", ncols=2)
     fig.suptitle("Reach to the nose: right vs left hand", x=0.01, ha="left", fontsize=10,
                  fontweight="bold", color=TEXT)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
+    return fig
+
+
+def plot_feature_by_hand(data: pd.DataFrame, feature: str, label: str = "", unit: str = ""):
+    """One feature, right vs left hand. Left panel: every reach (dots) with the median per
+    hand. Right panel: one line per person from the mean of the left-hand reaches to the
+    mean of the right-hand reaches (people anonymous, sorted)."""
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(9.6, 2.9), gridspec_kw={"width_ratios": [1.35, 1]})
+    rng = np.random.default_rng(0)
+    values = data[feature].dropna()
+    for i, hand in [(1, "right"), (0, "left")]:
+        x = data.loc[data["hand"] == hand, feature].dropna()
+        a1.scatter(x, i + rng.uniform(-0.18, 0.18, len(x)), s=12, color=HAND_COLORS[hand],
+                   edgecolor=SURFACE, linewidth=0.5, alpha=0.85, zorder=2)
+        if len(x):
+            m = x.median()
+            a1.plot([m, m], [i - 0.3, i + 0.3], color=TEXT, lw=2, zorder=3)
+    a1.set_yticks([1, 0], [f"right hand ({(data['hand'] == 'right').sum()})",
+                           f"left hand ({(data['hand'] == 'left').sum()})"])
+    a1.set_ylim(-0.6, 1.6)
+    a1.grid(axis="y", visible=False)
+    a1.grid(axis="x", visible=True)
+    a1.set_xlabel(unit)
+    a1.set_title("each reach (black bar = median)", fontsize=9)
+
+    per = data.pivot_table(index="session_id", columns="hand", values=feature, aggfunc="mean")
+    per = per.dropna().assign(gap=lambda d: d["right"] - d["left"]).sort_values("gap")
+    per = per.reset_index(drop=True)
+    for i, row in per.iterrows():
+        a2.plot([row["left"], row["right"]], [i, i], color="#c3c2b7", lw=1.4, zorder=1)
+    for hand in ["right", "left"]:
+        a2.scatter(per[hand], per.index, s=22, color=HAND_COLORS[hand], edgecolor=SURFACE,
+                   linewidth=1, zorder=2)
+    if len(values) and values.min() < 0 < values.max():
+        a1.axvline(0, color=MUTED, lw=1, zorder=1)
+        a2.axvline(0, color=MUTED, lw=1, zorder=0)
+    higher = (per["right"] > per["left"]).sum()
+    a2.set_yticks([])
+    a2.grid(axis="y", visible=False)
+    a2.grid(axis="x", visible=True)
+    a2.set_xlabel(unit)
+    a2.set_title(f"mean per person: right > left in {higher} of {len(per)}", fontsize=9)
+    fig.suptitle(f"{feature}: {label}" if label else feature, x=0.01, ha="left",
+                 fontsize=10, fontweight="bold", color=TEXT)
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
     return fig

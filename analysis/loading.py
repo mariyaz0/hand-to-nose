@@ -156,13 +156,33 @@ def sessions_table(raw_sessions: list[dict]) -> pd.DataFrame:
     return df.sort_values("created_at").reset_index(drop=True)
 
 
+def session_completeness(
+    sessions: pd.DataFrame, trials: pd.DataFrame, full: int = 12
+) -> pd.DataFrame:
+    """How many sessions recorded all trials, some trials or none (counts only)."""
+    n = sessions["session_id"].map(trials["session_id"].value_counts()).fillna(0).astype(int)
+    group = np.select(
+        [n >= full, n > 0], [f"complete ({full} of {full} trials)", f"partial (1–{full - 1} trials)"],
+        default="no trials arrived",
+    )
+    order = [f"complete ({full} of {full} trials)", f"partial (1–{full - 1} trials)", "no trials arrived"]
+    table = (
+        pd.DataFrame({"group": group, "trials": n})
+        .groupby("group")
+        .agg(sessions=("trials", "size"), trials=("trials", "sum"))
+        .reindex(order, fill_value=0)
+    )
+    table.loc["all"] = table.sum()
+    return table.rename_axis("")
+
+
 def participant_summary(sessions: pd.DataFrame) -> pd.DataFrame:
     """Aggregate description of the people (no per-person rows, safe to publish)."""
     if sessions.empty:
         return pd.DataFrame(columns=["value"])
     age = sessions["age"].dropna()
     items = {
-        "people (sessions)": len(sessions),
+        "sessions": len(sessions),
         "right-handed / mixed / left-handed": " / ".join(
             str((sessions["handedness"] == g).sum())
             for g in ["right-handed", "mixed", "left-handed"]

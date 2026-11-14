@@ -242,3 +242,56 @@ def features_table(raw_sessions: list[dict], raw_trials: list[dict]) -> pd.DataF
     if not df.empty:
         df["n_trials_in_session"] = df.groupby("session_id")["trial_id"].transform("count")
     return df
+
+
+# ------------------------------------------------------------- right vs left, per feature
+
+FEATURE_LABELS = {
+    "rot_y_angle": ("net turn about y (long axis)", "deg"),
+    "rot_y_max": ("largest rotation rate about y, positive", "deg/s"),
+    "rot_y_min": ("largest rotation rate about y, negative", "deg/s"),
+    "rot_z_angle": ("net turn about z (screen plane)", "deg"),
+    "rot_z_max": ("largest rotation rate about z, positive", "deg/s"),
+    "rot_z_min": ("largest rotation rate about z, negative", "deg/s"),
+    "acc_x_mean": ("mean sideways acceleration", "m/s²"),
+    "acc_x_max": ("largest sideways acceleration, positive", "m/s²"),
+    "acc_x_min": ("largest sideways acceleration, negative", "m/s²"),
+}
+
+
+def separation(right: np.ndarray, left: np.ndarray) -> float:
+    """Probability that a random right-hand reach has a larger value than a random
+    left-hand reach (ties count half). 0.5 = no difference; 1 or 0 = no overlap at all."""
+    r = np.asarray(right, dtype=float)[:, None]
+    l = np.asarray(left, dtype=float)[None, :]
+    return float(((r > l) + 0.5 * (r == l)).mean())
+
+
+def hand_difference_table(data: pd.DataFrame, features: list[str] = FEATURES) -> pd.DataFrame:
+    """One row per feature: mean per hand, which hand is higher, how well one feature alone
+    separates the hands, and in how many people the right-hand mean is on the same side.
+    Aggregate only (no per-person rows)."""
+    per_person = data.pivot_table(index="session_id", columns="hand", values=features, aggfunc="mean")
+    rows = {}
+    for f in features:
+        right = data.loc[data["hand"] == "right", f].dropna()
+        left = data.loc[data["hand"] == "left", f].dropna()
+        p = separation(right, left)
+        higher = "right" if p >= 0.5 else "left"
+        both = per_person[f].dropna()
+        same = int(((both["right"] > both["left"]) == (higher == "right")).sum())
+        label, unit = FEATURE_LABELS.get(f, (f, ""))
+        rows[f] = {
+            "meaning": f"{label}, {unit}",
+            "right hand, mean": right.mean(),
+            "left hand, mean": left.mean(),
+            "higher in": higher,
+            "separation": max(p, 1 - p),
+            "people, same direction": f"{same} / {len(both)}",
+        }
+    return (
+        pd.DataFrame(rows).T
+        .astype({"right hand, mean": float, "left hand, mean": float, "separation": float})
+        .sort_values("separation", ascending=False)
+        .rename_axis("feature")
+    )
