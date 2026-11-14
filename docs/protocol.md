@@ -64,3 +64,20 @@ trials already done.
 One movement to the nose and back, done with an unknown hand. The screen shows the
 predicted hand and the confidence, e.g. "Right hand (87%)". There is no calibration:
 the model is trained only on other people.
+
+Opened with **`?mode=test`** (https://mariyaz0.github.io/hand-to-nose/?mode=test), app 2.3.0, D-54:
+
+1. Screen "Test: which hand?": short instruction, "Allow motion sensors" (also unlocks the sound),
+   then "Start". No consent screen and no questionnaire.
+2. One trial exactly as in data collection: phone still and upright for 1 s → 2 s pause → high beep
+   → the person brings the phone to the nose with either hand at their own pace → nose touch (low beep)
+   → back → phone still. Moving before the beep, no touch within 10 s or leaving the app repeats the
+   trial, as in data collection.
+3. Answer screen: "This was the LEFT/RIGHT HAND", confidence (shown at most 99 %), and the net turn of
+   the phone about its long axis. If the phone turned less than 4° in total during the reach, the
+   answer is "Movement not recognised" (D-52). "Again" starts the next test movement.
+
+The answer is computed in the browser (`web/js/classify.js`) with the final model
+(`web/js/hand_model.js`, D-53), using only the reach from the high beep to the first nose touch.
+Every test movement is saved as a session with `mode = 'test'` and a trial with `hand` and `speed`
+NULL and the prediction filled in; test sessions are never part of the training data.

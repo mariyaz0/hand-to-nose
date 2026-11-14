@@ -23,7 +23,7 @@ Verified on 2026-11-11: anon insert works; anon select is denied; a trial for an
 | Column | Meaning |
 |---|---|
 | `id` | UUID generated in the browser; also the anonymous participant code |
-| `mode` | `collect` (data collection) or `test` (final exam) |
+| `mode` | `collect` (data collection) or `test` (final exam, `?mode=test`; no consent screen and no questionnaire, so `consent_given` = false and `age`, `sex`, `edinburgh` are NULL; `device.model_version` holds the model) |
 | `language` | `en` / `ru` |
 | `consent_given` | must be true in `collect` mode |
 | `age`, `sex` | questionnaire; from app 2.2.1 `sex` holds the answer to the "Gender" question (Russian: "Пол"), `male` or `female` only (D-37) |
@@ -50,7 +50,7 @@ Failed attempts (moved before the high beep, or no nose touch within 10 s) are *
 | `touch_events` | all touches, including ignored ones outside the zone |
 | `sample_rate_hz`, `n_samples` | measured mean sampling rate and sample count |
 | `samples` | raw sensor data, columnar JSON (below) |
-| `predicted_hand`, `predicted_prob`, `model_version` | test mode only |
+| `predicted_hand`, `predicted_prob`, `model_version` | test mode only: the answer shown, the probability of that answer (0.5–1), and the model (e.g. `hand-v1`); `predicted_hand` is NULL when the phone did not move (D-52) |
 
 All times are in milliseconds, relative to the first sample of the trial (`samples.t[0] = 0`).
 Sensor, touch and beep times come from the same browser clock (`performance.now()` / `event.timeStamp`).

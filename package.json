@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test web/tests/*.test.js",
     "serve": "python3 -m http.server 8000 --directory web",
-    "test:e2e": "node web/tests/e2e.mjs"
+    "test:e2e": "node web/tests/e2e.mjs",
+    "test:e2e-test": "node web/tests/e2e_test_mode.mjs"
   },
   "devDependencies": {
     "puppeteer-core": "^23.0.0"
