@@ -4,7 +4,7 @@
 // reach, from the high beep to the first nose touch. web/tests/classify.test.js checks
 // that the result equals the Python code. No browser APIs here, so it runs in Node too.
 
-import { MODEL } from './hand_model.js?v=0433a87';
+import { MODEL } from './hand_model.js?v=bb98521';
 
 const P = MODEL.preprocessing;
 const SIX = ['ax', 'ay', 'az', 'gz', 'gx', 'gy']; // acceleration + rotation (rot_x, rot_y, rot_z)

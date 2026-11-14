@@ -15,7 +15,7 @@ const STRINGS = {
     not_phone: 'Please open this link on your phone: a computer has no motion sensors.',
 
     consent_title: 'Consent',
-    consent_p1: 'This is a student research project in the lab of Prof. Izhar Bar-Gad (Gonda Brain Research Center, Bar-Ilan University). Researcher: Mariya Zastenskaya.',
+    consent_p1: 'This is a student research project at Bar-Ilan University. Researcher: Mariya Zastenskaya.',
     consent_p2: 'During the movements we record the motion sensors of this phone (acceleration and rotation) and the touches on the screen. We also record your answers about age, gender and handedness, and the phone model. We do not record your name, camera, microphone or location.',
     consent_p3: 'The data are anonymous (you get a random code) and are used only for research. You can stop at any moment by closing the page. If you have questions, ask the person who sent you the link.',
     consent_check: 'I have read this and I agree to take part.',
@@ -138,7 +138,7 @@ const STRINGS = {
     not_phone: 'Откройте эту ссылку на телефоне: у компьютера нет датчиков движения.',
 
     consent_title: 'Согласие',
-    consent_p1: 'Это студенческий исследовательский проект в лаборатории проф. Изхара Бар-Гада (Центр исследований мозга Гонда, Университет Бар-Илан). Исследователь: Мария Застенская.',
+    consent_p1: 'Это студенческий исследовательский проект в Университете Бар-Илан. Исследователь: Мария Застенская.',
     consent_p2: 'Во время движений записываются датчики движения телефона (ускорение и вращение) и касания экрана. Также сохраняются ваши ответы о возрасте, поле и ведущей руке и модель телефона. Мы не записываем имя, камеру, микрофон и местоположение.',
     consent_p3: 'Данные анонимны (вы получаете случайный код) и используются только для исследования. Вы можете остановиться в любой момент, закрыв страницу. Если есть вопросы, спросите человека, который прислал вам ссылку.',
     consent_check: 'Я прочитал(а) и согласен(на) участвовать.',

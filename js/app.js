@@ -3,17 +3,17 @@
 // Test mode (open with ?mode=test, D-54): one movement at a time, then the answer of the
 // model (which hand, with confidence); test runs are saved with mode = 'test'.
 
-import { APP_VERSION, PROTOCOL, DETECT, UI } from './config.js?v=0433a87';
-import { t, setLang, getLang, onLangChange, initialLang } from './i18n.js?v=0433a87';
-import { Beeper } from './audio.js?v=0433a87';
-import { Sensors, requestSensorPermission } from './sensors.js?v=0433a87';
-import { SampleBuffer, windowStats } from './motion.js?v=0433a87';
-import { TrialRunner, STATE } from './trial.js?v=0433a87';
-import { Uploader } from './db.js?v=0433a87';
-import { createDemo } from './demo.js?v=0433a87';
-import { buildPlan as makePlan } from './plan.js?v=0433a87';
-import { predictHand } from './classify.js?v=0433a87';
-import { MODEL } from './hand_model.js?v=0433a87';
+import { APP_VERSION, PROTOCOL, DETECT, UI } from './config.js?v=bb98521';
+import { t, setLang, getLang, onLangChange, initialLang } from './i18n.js?v=bb98521';
+import { Beeper } from './audio.js?v=bb98521';
+import { Sensors, requestSensorPermission } from './sensors.js?v=bb98521';
+import { SampleBuffer, windowStats } from './motion.js?v=bb98521';
+import { TrialRunner, STATE } from './trial.js?v=bb98521';
+import { Uploader } from './db.js?v=bb98521';
+import { createDemo } from './demo.js?v=bb98521';
+import { buildPlan as makePlan } from './plan.js?v=bb98521';
+import { predictHand } from './classify.js?v=bb98521';
+import { MODEL } from './hand_model.js?v=bb98521';
 
 const $ = (id) => document.getElementById(id);
 const DEBUG = new URLSearchParams(location.search).has('debug');
