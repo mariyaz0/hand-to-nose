@@ -7,8 +7,8 @@
   <meta name="description" content="Hand-to-nose study, Bar-Ilan University">
   <title>Which hand? · Hand-to-nose study</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2210%22 fill=%22%23b3261e%22/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css?v=2488eb3">
-  <script type="module" src="js/app.js?v=2488eb3"></script>
+  <link rel="stylesheet" href="css/style.css?v=0433a87">
+  <script type="module" src="js/app.js?v=0433a87"></script>
 </head>
 <body>
   <div id="lang" class="lang" role="group" aria-label="Language">
@@ -132,6 +132,27 @@
       <p data-i18n="done_text"></p>
       <p id="done-status" class="lead" aria-live="polite"></p>
       <p id="done-code" class="code"></p>
+    </section>
+
+    <!-- Test mode (?mode=test): one movement, then the answer -->
+    <section id="s-test" class="screen" hidden>
+      <div class="badge">Bar-Ilan University · IBG lab</div>
+      <h1 data-i18n="test_title"></h1>
+      <p data-i18n="test_text"></p>
+      <button id="btn-test-sensors" class="secondary" type="button" data-i18n="btn_sensors"></button>
+      <p id="test-sensor-status" class="note" aria-live="polite"></p>
+      <button id="btn-test-start" class="primary" type="button" disabled data-i18n="test_start"></button>
+      <p id="test-model" class="note"></p>
+    </section>
+
+    <section id="s-test-result" class="screen center" hidden>
+      <p id="res-title" class="lead"></p>
+      <div id="res-hand" class="res-hand"></div>
+      <div id="res-conf" class="res-conf"></div>
+      <div class="res-bar" aria-hidden="true"><div id="res-bar-fill"></div></div>
+      <p id="res-detail" class="note"></p>
+      <button id="btn-test-again" class="primary" type="button" data-i18n="test_again"></button>
+      <p id="res-model" class="note"></p>
     </section>
   </main>
 

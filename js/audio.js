@@ -1,7 +1,7 @@
 // Two short beeps made with the Web Audio API (same sounds as the v0.1 Android app:
 // 1000 Hz and 600 Hz, 120 ms, 5 ms fade in/out to avoid clicks).
 
-import { PROTOCOL } from './config.js?v=2488eb3';
+import { PROTOCOL } from './config.js?v=0433a87';
 
 export class Beeper {
   constructor() {

@@ -282,3 +282,12 @@ input[type="number"] {
 .overlay.ov-hand .ov-main { color: var(--ink); }
 .overlay.ov-notice .ov-card { border-top-color: var(--ok); }
 .overlay.ov-notice .ov-main { color: var(--ok); }
+
+/* Test mode: the answer */
+.res-hand { font-size: 44px; font-weight: 800; letter-spacing: 0.02em; margin: 8px 0 4px; }
+.res-hand.left { color: #c4521f; }
+.res-hand.right { color: #2a68b8; }
+.res-conf { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.res-bar { height: 10px; border-radius: 5px; background: #e6e3dc; margin: 14px auto 18px; max-width: 320px; overflow: hidden; }
+.res-bar > div { height: 100%; border-radius: 5px; background: var(--accent); width: 0; }
+#s-test-result button { margin-top: 18px; }

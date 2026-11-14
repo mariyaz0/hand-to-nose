@@ -1,18 +1,23 @@
 // Data-collection app: screens, the plan of trials and the connection between
 // sensors, the trial state machine, the beeps and the upload.
+// Test mode (open with ?mode=test, D-54): one movement at a time, then the answer of the
+// model (which hand, with confidence); test runs are saved with mode = 'test'.
 
-import { APP_VERSION, PROTOCOL, DETECT, UI } from './config.js?v=2488eb3';
-import { t, setLang, getLang, onLangChange, initialLang } from './i18n.js?v=2488eb3';
-import { Beeper } from './audio.js?v=2488eb3';
-import { Sensors, requestSensorPermission } from './sensors.js?v=2488eb3';
-import { SampleBuffer, windowStats } from './motion.js?v=2488eb3';
-import { TrialRunner, STATE } from './trial.js?v=2488eb3';
-import { Uploader } from './db.js?v=2488eb3';
-import { createDemo } from './demo.js?v=2488eb3';
-import { buildPlan as makePlan } from './plan.js?v=2488eb3';
+import { APP_VERSION, PROTOCOL, DETECT, UI } from './config.js?v=0433a87';
+import { t, setLang, getLang, onLangChange, initialLang } from './i18n.js?v=0433a87';
+import { Beeper } from './audio.js?v=0433a87';
+import { Sensors, requestSensorPermission } from './sensors.js?v=0433a87';
+import { SampleBuffer, windowStats } from './motion.js?v=0433a87';
+import { TrialRunner, STATE } from './trial.js?v=0433a87';
+import { Uploader } from './db.js?v=0433a87';
+import { createDemo } from './demo.js?v=0433a87';
+import { buildPlan as makePlan } from './plan.js?v=0433a87';
+import { predictHand } from './classify.js?v=0433a87';
+import { MODEL } from './hand_model.js?v=0433a87';
 
 const $ = (id) => document.getElementById(id);
 const DEBUG = new URLSearchParams(location.search).has('debug');
+const MODE = new URLSearchParams(location.search).get('mode') === 'test' ? 'test' : 'collect';
 
 const EDINBURGH_ITEMS = ['writing', 'throwing', 'toothbrush', 'spoon'];
 const EDINBURGH_SCORES = [-100, -50, 0, 50, 100];
@@ -35,7 +40,14 @@ const app = {
   zone: null,
   wakeLock: null,
   current: null,
+  sessionStartedAt: null,
+  testCount: 0,
 };
+
+// a trial is accepted only for a session younger than 3 hours with fewer than 40 trials
+// (supabase/migrations); the test mode starts a new session well before that
+const TEST_SESSION_MAX_TRIALS = 38;
+const TEST_SESSION_MAX_MS = 2.5 * 3600 * 1000;
 
 const buffer = new SampleBuffer(60000);
 const sensors = new Sensors();
@@ -110,6 +122,8 @@ function initLang() {
     document.querySelectorAll('#lang button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === l)));
     if (app.current) renderTrialLabels(app.current);
     if (!$('s-rest').hidden) renderRestText();
+    if (!$('s-test-result').hidden) showTestResult();
+    $('test-model').textContent = t('test_model', { v: MODEL.model_version });
     updateDoneStatus();
   });
   setLang(initialLang());
@@ -241,6 +255,7 @@ function buildPlan() {
 }
 
 function runNext() {
+  if (MODE === 'test') { startTestTrial(); return; }
   const item = app.plan[app.pos];
   if (!item) { finish(); return; }
 
@@ -330,6 +345,12 @@ function placeZone() {
 // ---------------------------------------------------------------- trial screen
 
 function renderTrialLabels(item) {
+  if (item.kind === 'test') {
+    $('tr-progress').textContent = t('test_progress', { n: item.n });
+    $('tr-hand').textContent = t('test_any_hand');
+    $('tr-speed').textContent = t('test_own_pace');
+    return;
+  }
   $('tr-progress').textContent = item.kind === 'practice'
     ? t('progress_practice', { n: item.n, total: item.total })
     : t('progress', { n: item.n, total: item.total });
@@ -356,6 +377,7 @@ function renderTrialState(state) {
 
 function trialDone(result) {
   const item = app.current;
+  if (item.kind === 'test') { testDone(result); return; }
   if (item.kind === 'real') {
     uploader.add('trials', {
       id: uuid(),
@@ -378,7 +400,7 @@ function trialDone(result) {
 }
 
 function trialFailed(reason) {
-  if (app.current?.kind === 'real') app.failedBefore.push(reason);
+  if (app.current?.kind === 'real' || app.current?.kind === 'test') app.failedBefore.push(reason);
   setTrialLook('st-fail');
   $('tr-status').textContent = '';
   vibrate();
@@ -469,6 +491,18 @@ function deviceInfo() {
 
 function queueSession() {
   app.sessionQueued = true;
+  app.sessionStartedAt = Date.now();
+  if (MODE === 'test') {
+    uploader.add('sessions', {
+      id: app.sessionId,
+      app_version: APP_VERSION,
+      mode: 'test',
+      language: getLang(),
+      consent_given: false, // a test run (final exam) does not ask for consent (schema)
+      device: { ...deviceInfo(), model_version: MODEL.model_version },
+    });
+    return;
+  }
   uploader.add('sessions', {
     id: app.sessionId,
     app_version: APP_VERSION,
@@ -482,6 +516,107 @@ function queueSession() {
     first_hand: app.firstHand,
     device: { ...deviceInfo(), speed_order: app.speedOrder },
   });
+}
+
+// ---------------------------------------------------------------- test mode (?mode=test)
+
+function initTest() {
+  $('test-model').textContent = t('test_model', { v: MODEL.model_version });
+  const status = $('test-sensor-status');
+  $('btn-test-sensors').addEventListener('click', async () => {
+    beeper.unlock();
+    keepScreenOn();
+    status.textContent = t('sensors_wait');
+    app.sensorPermission = await requestSensorPermission();
+    if (app.sensorPermission === 'denied') { status.textContent = t('sensors_denied'); return; }
+    sensors.start();
+    setTimeout(() => {
+      const rate = buffer.rate(1000);
+      const ok = rate && rate > 10;
+      status.textContent = ok ? t('sensors_ok', { rate: Math.round(rate) }) : t('sensors_fail');
+      status.classList.toggle('warn', !ok);
+      $('btn-test-start').disabled = !(ok || DEBUG);
+    }, 1500);
+  });
+  const begin = () => {
+    beeper.unlock();
+    keepScreenOn();
+    goFullscreen();
+    show('s-trial');
+    setTimeout(startTestTrial, 400); // let the layout settle before measuring the zone
+  };
+  $('btn-test-start').addEventListener('click', begin);
+  $('btn-test-again').addEventListener('click', begin);
+}
+
+function startTestTrial() {
+  const tooOld = app.sessionStartedAt && Date.now() - app.sessionStartedAt > TEST_SESSION_MAX_MS;
+  if (app.sessionQueued && (app.trialIndex >= TEST_SESSION_MAX_TRIALS || tooOld)) {
+    app.sessionId = uuid();
+    app.sessionQueued = false;
+    app.trialIndex = 0;
+  }
+  const item = app.current?.kind === 'test' && !app.current.done ? app.current : { kind: 'test', n: app.testCount + 1 };
+  app.current = item;
+  show('s-trial');
+  placeZone();
+  renderTrialLabels(item);
+  setTrialLook('st-wait');
+  startTrial();
+}
+
+function testDone(result) {
+  const item = app.current;
+  item.done = true;
+  app.testCount++;
+  const r = predictHand(result, app.zone?.r);
+  if (!app.sessionQueued) queueSession();
+  uploader.add('trials', {
+    id: uuid(),
+    session_id: app.sessionId,
+    block_index: 0,
+    trial_index: app.trialIndex++,
+    hand: null,
+    speed: null,
+    failed_before: app.failedBefore,
+    ...result,
+    predicted_hand: r.hand,
+    predicted_prob: r.hand ? Math.round(r.confidence * 10000) / 10000 : null,
+    model_version: MODEL.model_version,
+  });
+  app.failedBefore = [];
+  app.lastResult = r;
+  setTrialLook('st-ok');
+  $('tr-status').textContent = '';
+  showTestResult();
+}
+
+function showTestResult() {
+  const r = app.lastResult;
+  if (!r) return;
+  const hand = $('res-hand');
+  if (r.hand) {
+    const pct = Math.min(99, Math.round(100 * r.confidence)); // a model is never 100 % sure
+    $('res-title').textContent = t('test_result_title');
+    hand.textContent = t(`test_${r.hand}`);
+    hand.className = `res-hand ${r.hand}`;
+    $('res-conf').textContent = t('test_confidence', { p: pct });
+    $('res-bar-fill').style.width = `${pct}%`;
+    $('res-detail').textContent = t('test_detail', {
+      deg: (r.rot_y_angle > 0 ? '+' : r.rot_y_angle < 0 ? '\u2212' : '') + Math.abs(r.rot_y_angle).toFixed(1),
+      dir: t(r.rot_y_angle < 0 ? 'test_dir_left' : 'test_dir_right'),
+    });
+  } else {
+    $('res-title').textContent = '';
+    hand.textContent = t('test_no_move_title');
+    hand.className = 'res-hand';
+    $('res-conf').textContent = '';
+    $('res-bar-fill').style.width = '0';
+    $('res-detail').textContent = t('test_no_move');
+  }
+  $('res-model').textContent = t('test_model', { v: r.model_version });
+  try { if (document.fullscreenElement) document.exitFullscreen(); } catch { /* ignore */ }
+  show('s-test-result');
 }
 
 // ---------------------------------------------------------------- done
@@ -540,4 +675,5 @@ initSetup();
 initExplain();
 initTouches();
 initDebug();
-show('s-welcome');
+initTest();
+show(MODE === 'test' ? 's-test' : 's-welcome');
