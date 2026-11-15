@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-import { predictHand, reachFeature, movingAverage, interp, probabilityLeft } from '../js/classify.js';
+import { predictHand, predictHandRule, RULE_VERSION, reachFeature, movingAverage, interp, probabilityLeft } from '../js/classify.js';
 import { MODEL } from '../js/hand_model.js';
 
 const fixture = JSON.parse(fs.readFileSync(new URL('./fixtures/classify.json', import.meta.url), 'utf8'));
@@ -54,3 +54,14 @@ test('no answer when the phone did not move', () => {
   assert.equal(r.confidence, null);
   assert.ok(r.excluded);
 });
+
+for (const c of fixture.cases) {
+  test(`sign rule: ${c.name}`, () => {
+    const r = predictHandRule(c.trial, c.zone_r_px);
+    assert.equal(r.model_version, RULE_VERSION);
+    assert.equal(r.confidence, null);
+    const e = c.expected;
+    if (e.rot_y_angle == null) assert.equal(r.hand, null);
+    else assert.equal(r.hand, e.rot_y_angle < 0 ? 'left' : 'right');
+  });
+}

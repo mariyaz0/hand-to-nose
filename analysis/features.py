@@ -45,7 +45,7 @@ MIN_TOTAL_ROTATION = 4.0  # deg turned in total during the reach; below this the
 ROTATION_COLUMNS = {"rot_x": "gz", "rot_y": "gx", "rot_z": "gy"}
 ACC_COLUMNS = ["ax", "ay", "az"]
 
-# The feature columns, in a fixed order (the browser test mode must compute the same).
+# The 9 features of one reach, in a fixed order (the browser test mode computes rot_y_angle).
 FEATURES = [
     "rot_y_angle",   # net turn about y over the reach, deg
     "rot_y_max",     # largest positive rotation rate about y, deg/s

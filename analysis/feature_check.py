@@ -267,7 +267,7 @@ def candidate_features(raw_sessions: list[dict], raw_trials: list[dict], data: p
     return pd.DataFrame(rows)
 
 
-CHOSEN = {"rot_y net turn": "rot_y_angle", "rot_y max": "rot_y_max", "rot_y min": "rot_y_min",
+NINE = {"rot_y net turn": "rot_y_angle", "rot_y max": "rot_y_max", "rot_y min": "rot_y_min",
           "rot_z net turn": "rot_z_angle", "rot_z max": "rot_z_max", "rot_z min": "rot_z_min",
           "ax mean": "acc_x_mean", "ax max": "acc_x_max", "ax min": "acc_x_min"}
 
@@ -283,7 +283,7 @@ def screen_table(cands: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
         channel = c.split(" ")[0]
         rows[c] = {"channel": CHANNELS[channel][0],
                    "mirror symmetry says": "should differ" if CHANNELS[channel][2] == "flips" else "should be the same",
-                   "in the model (A)": "yes" if c in CHOSEN else "",
+                   "one of the 9 features": "yes" if c in NINE else "",
                    "separation": max(p, 1 - p),
                    "people, same direction": f"{same} / {len(per)}"}
     return pd.DataFrame(rows).T.astype({"separation": float}).sort_values("separation", ascending=False).rename_axis("candidate")
@@ -298,7 +298,7 @@ def plot_screen(screen: pd.DataFrame):
     colors = np.where(differ, HAND_COLORS["right"], "#c3c2b7")
     ax.barh(y, s["separation"] - 0.5, left=0.5, height=0.62, color=colors, zorder=2)
     for yi, (name, row) in zip(y, s.iterrows()):
-        mark = "  ◆ in model A" if row["in the model (A)"] == "yes" else ""
+        mark = "  ◆ one of the 9" if row["one of the 9 features"] == "yes" else ""
         ax.text(row["separation"] + 0.005, yi, f"{row['separation']:.2f}{mark}", va="center",
                 fontsize=7.5, color=TEXT_2)
     ax.set_yticks(y, s.index, fontsize=8)

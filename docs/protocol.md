@@ -81,3 +81,14 @@ The answer is computed in the browser (`web/js/classify.js`) with the final mode
 (`web/js/hand_model.js`, D-53), using only the reach from the high beep to the first nose touch.
 Every test movement is saved as a session with `mode = 'test'` and a trial with `hand` and `speed`
 NULL and the prediction filled in; test sessions are never part of the training data.
+
+**Sign rule, no model** — opened with **`?mode=rule`** (https://mariyaz0.github.io/hand-to-nose/?mode=rule),
+app 2.4.0, D-56. The same screens and the same trial; the answer is the hand from the sign of the net
+turn about the long axis alone: left hand if it is below 0°, otherwise right hand. No probability is
+shown. The rule in code (`predictHandRule` in `web/js/classify.js`):
+
+```js
+const hand = rot_y_angle < 0 ? 'left' : 'right';
+```
+
+Saved like the test mode, with `model_version = 'sign-rule-v1'` and `predicted_prob` NULL.

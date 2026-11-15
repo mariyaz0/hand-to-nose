@@ -1,4 +1,5 @@
 // Run: npm run serve (in another terminal), then npm run test:e2e-test
+// (MODE_UI=rule checks the rule mode, ?mode=rule, the same way).
 // End-to-end check of the test mode (?mode=test) in headless Chrome: a simulated person
 // makes a left-hand movement, a right-hand movement, a false start and a "movement" in
 // which the phone does not move. Supabase requests are intercepted and recorded.
@@ -7,6 +8,7 @@ import fs from 'node:fs';
 
 const BASE = process.env.BASE ?? 'http://localhost:8000/';
 const OUT = process.env.OUT ?? 'e2e-output';
+const MODE_UI = process.env.MODE_UI === 'rule' ? 'rule' : 'test';
 fs.mkdirSync(OUT, { recursive: true });
 
 // what the simulated person does in each test, in order
@@ -113,7 +115,7 @@ const waitFor = async (id, ms = 30000) => {
   return false;
 };
 
-await page.goto(`${BASE}?mode=test`, { waitUntil: 'networkidle0' });
+await page.goto(`${BASE}?mode=${MODE_UI}`, { waitUntil: 'networkidle0' });
 if (lang === 'ru') await page.click('#lang button[data-lang="ru"]');
 await shot('01-intro');
 await page.click('#btn-test-sensors');
@@ -151,7 +153,7 @@ await sleep(1500);
 const simLog = await page.evaluate(() => window.__sim.log);
 await browser.close();
 
-fs.writeFileSync(`${OUT}/posted-test-${lang}.json`, JSON.stringify(posted, null, 1));
+fs.writeFileSync(`${OUT}/posted-${MODE_UI}-${lang}.json`, JSON.stringify(posted, null, 1));
 const sessions = posted.filter((p) => p.url.endsWith('/sessions')).map((p) => p.body);
 const trials = posted.filter((p) => p.url.endsWith('/trials')).map((p) => p.body);
 const summary = {
@@ -176,5 +178,11 @@ if (trials[1]?.predicted_hand !== 'right') fail.push('second movement should be 
 if (!(trials[1]?.failed_before ?? []).includes('false_start')) fail.push('false start not recorded');
 if (trials[2]?.predicted_hand !== null) fail.push('no answer expected for the no-move trial');
 if (trials.some((t) => t.hand !== null || t.speed !== null)) fail.push('hand and speed must be null in test mode');
+if (MODE_UI === 'rule') {
+  if (sessions[0]?.device?.model_version !== 'sign-rule-v1') fail.push('rule session must be labelled sign-rule-v1');
+  if (trials.some((t) => t.model_version !== 'sign-rule-v1')) fail.push('rule trials must be labelled sign-rule-v1');
+  if (trials.some((t) => t.predicted_prob !== null)) fail.push('the rule gives no probability');
+  if (results.some((r) => r.conf !== '')) fail.push('the rule screen shows no confidence');
+} else if (!(trials[0]?.predicted_prob > 0.5)) fail.push('the model gives a probability');
 if (fail.length) { console.error('FAILED:', fail.join('; ')); process.exit(1); }
 console.log('OK');

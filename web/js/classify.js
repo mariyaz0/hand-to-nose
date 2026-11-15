@@ -161,3 +161,16 @@ export function predictHand(trial, zoneRadiusPx) {
   res.confidence = Math.max(p, 1 - p);
   return res;
 }
+
+/** Version label of the sign rule, saved with every rule-mode answer (D-56). */
+export const RULE_VERSION = 'sign-rule-v1';
+
+/**
+ * The answer without a model and without a probability (?mode=rule, D-56): the same net
+ * turn about the long axis, and the hand from its sign alone.
+ */
+export function predictHandRule(trial, zoneRadiusPx) {
+  const f = reachFeature(trial, zoneRadiusPx);
+  const hand = f.excluded || f.rot_y_angle == null ? null : f.rot_y_angle < 0 ? 'left' : 'right';
+  return { ...f, hand, confidence: null, pLeft: null, model_version: RULE_VERSION };
+}

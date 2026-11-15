@@ -123,6 +123,10 @@ const STRINGS = {
     test_no_move: 'The phone hardly moved before the nose touch. Please bring the phone to the nose with the arm.',
     test_again: 'Again',
     test_model: 'Model {v}',
+    rule_title: 'Test: which hand? (simple rule)',
+    rule_name: 'No model: left hand if the turn is below 0°',
+    rule_detail_left: 'The phone turned {deg}° about its long axis: below 0°, so the left hand.',
+    rule_detail_right: 'The phone turned {deg}° about its long axis: 0° or more, so the right hand.',
     upload_error: 'Could not send the data yet. Check the internet connection; the app keeps trying.',
   },
 
@@ -246,6 +250,10 @@ const STRINGS = {
     test_no_move: 'Телефон почти не двигался до касания носом. Поднесите телефон к носу рукой.',
     test_again: 'Ещё раз',
     test_model: 'Модель {v}',
+    rule_title: 'Тест: какая рука? (простое правило)',
+    rule_name: 'Без модели: левая рука, если поворот меньше 0°',
+    rule_detail_left: 'Телефон повернулся на {deg}° вокруг своей длинной оси: меньше 0°, значит левая рука.',
+    rule_detail_right: 'Телефон повернулся на {deg}° вокруг своей длинной оси: 0° или больше, значит правая рука.',
     upload_error: 'Пока не удалось отправить данные. Проверьте интернет; приложение пробует снова.',
   },
 };

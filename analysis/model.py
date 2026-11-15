@@ -28,7 +28,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from features import (FEATURES, GRID_MS, SMOOTH_POINTS, BASELINE_MS, TOUCH_NEAR_RADII,
+from features import (GRID_MS, SMOOTH_POINTS, BASELINE_MS, TOUCH_NEAR_RADII,
                       MIN_TOTAL_ROTATION)
 
 INCLUDE_MINORS = True   # D-49
@@ -78,7 +78,7 @@ def make_model() -> object:
     return make_pipeline(StandardScaler(), LogisticRegression(C=C, max_iter=1000))
 
 
-def leave_one_subject_out(data: pd.DataFrame, features: list[str] = FEATURES) -> pd.DataFrame:
+def leave_one_subject_out(data: pd.DataFrame, features: list[str] = FINAL_FEATURES) -> pd.DataFrame:
     """For every person: train on all the others, predict this person's trials.
 
     Returns the trial rows with `p_left` (predicted probability of the left hand),
@@ -148,19 +148,19 @@ def per_person_accuracy(res: pd.DataFrame) -> pd.DataFrame:
     return t
 
 
-def fit_final(data: pd.DataFrame, features: list[str] = FEATURES):
+def fit_final(data: pd.DataFrame, features: list[str] = FINAL_FEATURES):
     model = make_model()
     model.fit(data[features], data["hand"] == POSITIVE)
     return model
 
 
-def coefficients(model, features: list[str] = FEATURES) -> pd.DataFrame:
+def coefficients(model, features: list[str] = FINAL_FEATURES) -> pd.DataFrame:
     """Weights on the standardised features: + pushes towards "left", − towards "right"."""
     lr = model.named_steps["logisticregression"]
     return pd.DataFrame({"weight": lr.coef_[0]}, index=pd.Index(features, name="feature"))
 
 
-def model_json(model, data: pd.DataFrame, features: list[str] = FEATURES,
+def model_json(model, data: pd.DataFrame, features: list[str] = FINAL_FEATURES,
                version: str = MODEL_VERSION) -> dict:
     """Everything the browser needs to compute the same prediction (test mode)."""
     scaler = model.named_steps["standardscaler"]
