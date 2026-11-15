@@ -237,3 +237,47 @@ def plot_feature_by_hand(data: pd.DataFrame, feature: str, label: str = "", unit
                  fontsize=10, fontweight="bold", color=TEXT)
     fig.tight_layout(rect=(0, 0, 1, 0.93))
     return fig
+
+
+def plot_rotation_pair(pairs):
+    """Rotation rate of two movements one under the other (e.g. the right hand above, the
+    left hand below), on the same time axis and the same scale. `pairs` is a list of
+    (samples of one trial, trial row). Rotation about y (the phone's long axis) is drawn
+    thicker: it is the channel that separates the hands."""
+    fig, axes = plt.subplots(len(pairs), 1, figsize=(9, 2.7 * len(pairs)), sharex=True, sharey=True)
+    axes = np.atleast_1d(axes)
+    for ax, (samples, trial) in zip(axes, pairs):
+        beep = trial["t_beep_high_ms"]
+        events = {k: (trial[k] - beep) / 1000 for k in EVENTS if pd.notna(trial.get(k))}
+        if "t_touch_start_ms" in events:
+            ax.axvspan(0, events["t_touch_start_ms"], color=BAND, lw=0, zorder=0)
+        for x in events.values():
+            ax.axvline(x, color=MUTED, lw=0.8, ls="--", zorder=1)
+        ax.axhline(0, color=MUTED, lw=0.8, zorder=1)
+        ends = []
+        for ch in ["gz", "gy", "gx"]:
+            if ch not in samples or samples[ch].isna().all():
+                continue
+            name = ROTATION_AXIS[ch]
+            main = name == "y"
+            ax.plot(samples["t_s"], samples[ch], color=AXIS_COLORS[name], lw=2.2 if main else 1.0,
+                    alpha=1 if main else 0.6, zorder=3 if main else 2)
+            ends.append((samples[ch].dropna().iloc[-1], name))
+        _direct_labels(ax, ends)
+        ax.set_title(f"{trial['hand']} hand · {trial['speed']} · trial {trial['trial_index']}",
+                     color=HAND_COLORS.get(trial["hand"], TEXT))
+        ax.set_ylabel("deg/s")
+    top = axes[0].secondary_xaxis("top")
+    first = pairs[0][1]
+    ev0 = {k: (first[k] - first["t_beep_high_ms"]) / 1000 for k in EVENTS if pd.notna(first.get(k))}
+    top.set_xticks(list(ev0.values()), [EVENT_SHORT[k] for k in ev0])
+    top.tick_params(axis="x", rotation=90, labelsize=8, colors=TEXT_2, length=0)
+    top.spines["top"].set_visible(False)
+    axes[-1].set_xlabel("time from the high beep, s  (shaded: reach to the nose)")
+    handles = [plt.Line2D([], [], color=AXIS_COLORS[a], lw=2.2 if a == "y" else 1.2) for a in ["x", "y", "z"]]
+    fig.legend(handles, ["about x (tilt to the face)", "about y (long axis)", "about z (screen plane)"],
+               loc="upper right", ncols=3)
+    fig.suptitle("Rotation rate: one movement per hand, same scales", x=0.01, ha="left",
+                 fontsize=10, fontweight="bold", color=TEXT)
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    return fig
