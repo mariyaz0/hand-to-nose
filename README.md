@@ -75,8 +75,10 @@ The recordings are in Supabase: table `sessions` (one row per person) and table 
 | `analysis/plots.py` | plots used by the notebooks |
 | `analysis/features.py` | one reach (high beep → nose touch) → features; 50 Hz grid, smoothing, real rotation axes |
 | `analysis/model.py` | analysis rules, logistic regression, leave-one-subject-out test |
+| `analysis/feature_check.py` | checks behind the choice of features (mirror symmetry tested on the data) |
 | `notebooks/01_data_overview.ipynb` | what is recorded, where, how it looks; right vs left hand |
 | `notebooks/02_hand_model.ipynb` | features, the rules applied, test on unseen people, simpler versions |
+| `notebooks/03_why_these_features.ipynb` | why these features: the mirror-symmetry prediction checked on all the data, the features drawn on the signals, every person, all candidates |
 
 ## Repository
 
