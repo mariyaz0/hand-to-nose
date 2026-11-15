@@ -2,22 +2,29 @@
 // sensors, the trial state machine, the beeps and the upload.
 // Test mode (open with ?mode=test, D-54): one movement at a time, then the answer of the
 // model (which hand, with confidence); test runs are saved with mode = 'test'.
+// Rule mode (open with ?mode=rule, D-56): the same, but the hand comes from the sign of the
+// turn alone, without a model or a probability; saved as 'test' with model_version
+// 'sign-rule-v1'.
 
-import { APP_VERSION, PROTOCOL, DETECT, UI } from './config.js?v=bb98521';
-import { t, setLang, getLang, onLangChange, initialLang } from './i18n.js?v=bb98521';
-import { Beeper } from './audio.js?v=bb98521';
-import { Sensors, requestSensorPermission } from './sensors.js?v=bb98521';
-import { SampleBuffer, windowStats } from './motion.js?v=bb98521';
-import { TrialRunner, STATE } from './trial.js?v=bb98521';
-import { Uploader } from './db.js?v=bb98521';
-import { createDemo } from './demo.js?v=bb98521';
-import { buildPlan as makePlan } from './plan.js?v=bb98521';
-import { predictHand } from './classify.js?v=bb98521';
-import { MODEL } from './hand_model.js?v=bb98521';
+import { APP_VERSION, PROTOCOL, DETECT, UI } from './config.js?v=4123668';
+import { t, setLang, getLang, onLangChange, initialLang } from './i18n.js?v=4123668';
+import { Beeper } from './audio.js?v=4123668';
+import { Sensors, requestSensorPermission } from './sensors.js?v=4123668';
+import { SampleBuffer, windowStats } from './motion.js?v=4123668';
+import { TrialRunner, STATE } from './trial.js?v=4123668';
+import { Uploader } from './db.js?v=4123668';
+import { createDemo } from './demo.js?v=4123668';
+import { buildPlan as makePlan } from './plan.js?v=4123668';
+import { predictHand, predictHandRule, RULE_VERSION } from './classify.js?v=4123668';
+import { MODEL } from './hand_model.js?v=4123668';
 
 const $ = (id) => document.getElementById(id);
 const DEBUG = new URLSearchParams(location.search).has('debug');
-const MODE = new URLSearchParams(location.search).get('mode') === 'test' ? 'test' : 'collect';
+const MODE_PARAM = new URLSearchParams(location.search).get('mode');
+const RULE = MODE_PARAM === 'rule';
+const MODE = MODE_PARAM === 'test' || RULE ? 'test' : 'collect';
+const METHOD_VERSION = RULE ? RULE_VERSION : MODEL.model_version;
+if (RULE) document.querySelector('#s-test h1').dataset.i18n = 'rule_title';
 
 const EDINBURGH_ITEMS = ['writing', 'throwing', 'toothbrush', 'spoon'];
 const EDINBURGH_SCORES = [-100, -50, 0, 50, 100];
@@ -123,7 +130,7 @@ function initLang() {
     if (app.current) renderTrialLabels(app.current);
     if (!$('s-rest').hidden) renderRestText();
     if (!$('s-test-result').hidden) showTestResult();
-    $('test-model').textContent = t('test_model', { v: MODEL.model_version });
+    $('test-model').textContent = methodLabel();
     updateDoneStatus();
   });
   setLang(initialLang());
@@ -499,7 +506,7 @@ function queueSession() {
       mode: 'test',
       language: getLang(),
       consent_given: false, // a test run (final exam) does not ask for consent (schema)
-      device: { ...deviceInfo(), model_version: MODEL.model_version },
+      device: { ...deviceInfo(), model_version: METHOD_VERSION },
     });
     return;
   }
@@ -520,8 +527,12 @@ function queueSession() {
 
 // ---------------------------------------------------------------- test mode (?mode=test)
 
+function methodLabel() {
+  return RULE ? t('rule_name') : t('test_model', { v: MODEL.model_version });
+}
+
 function initTest() {
-  $('test-model').textContent = t('test_model', { v: MODEL.model_version });
+  $('test-model').textContent = methodLabel();
   const status = $('test-sensor-status');
   $('btn-test-sensors').addEventListener('click', async () => {
     beeper.unlock();
@@ -569,7 +580,7 @@ function testDone(result) {
   const item = app.current;
   item.done = true;
   app.testCount++;
-  const r = predictHand(result, app.zone?.r);
+  const r = RULE ? predictHandRule(result, app.zone?.r) : predictHand(result, app.zone?.r);
   if (!app.sessionQueued) queueSession();
   uploader.add('trials', {
     id: uuid(),
@@ -581,8 +592,8 @@ function testDone(result) {
     failed_before: app.failedBefore,
     ...result,
     predicted_hand: r.hand,
-    predicted_prob: r.hand ? Math.round(r.confidence * 10000) / 10000 : null,
-    model_version: MODEL.model_version,
+    predicted_prob: r.hand && r.confidence != null ? Math.round(r.confidence * 10000) / 10000 : null,
+    model_version: r.model_version,
   });
   app.failedBefore = [];
   app.lastResult = r;
@@ -595,7 +606,16 @@ function showTestResult() {
   const r = app.lastResult;
   if (!r) return;
   const hand = $('res-hand');
-  if (r.hand) {
+  $('res-bar-fill').parentElement.hidden = RULE;
+  const deg = r.rot_y_angle == null ? ''
+    : (r.rot_y_angle > 0 ? '+' : r.rot_y_angle < 0 ? '\u2212' : '') + Math.abs(r.rot_y_angle).toFixed(1);
+  if (r.hand && RULE) {
+    $('res-title').textContent = t('test_result_title');
+    hand.textContent = t(`test_${r.hand}`);
+    hand.className = `res-hand ${r.hand}`;
+    $('res-conf').textContent = '';
+    $('res-detail').textContent = t(r.hand === 'left' ? 'rule_detail_left' : 'rule_detail_right', { deg });
+  } else if (r.hand) {
     const pct = Math.min(99, Math.round(100 * r.confidence)); // a model is never 100 % sure
     $('res-title').textContent = t('test_result_title');
     hand.textContent = t(`test_${r.hand}`);
@@ -603,7 +623,7 @@ function showTestResult() {
     $('res-conf').textContent = t('test_confidence', { p: pct });
     $('res-bar-fill').style.width = `${pct}%`;
     $('res-detail').textContent = t('test_detail', {
-      deg: (r.rot_y_angle > 0 ? '+' : r.rot_y_angle < 0 ? '\u2212' : '') + Math.abs(r.rot_y_angle).toFixed(1),
+      deg,
       dir: t(r.rot_y_angle < 0 ? 'test_dir_left' : 'test_dir_right'),
     });
   } else {
@@ -614,7 +634,7 @@ function showTestResult() {
     $('res-bar-fill').style.width = '0';
     $('res-detail').textContent = t('test_no_move');
   }
-  $('res-model').textContent = t('test_model', { v: r.model_version });
+  $('res-model').textContent = methodLabel();
   try { if (document.fullscreenElement) document.exitFullscreen(); } catch { /* ignore */ }
   show('s-test-result');
 }
