@@ -5,7 +5,7 @@ from __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib import transforms
+from matplotlib import patheffects, transforms
 
 from loading import CHANNEL_LABELS, EVENTS, reach_profiles
 
@@ -29,8 +29,10 @@ EVENT_SHORT = {
 TRIAL_GROUPS = [
     ("Acceleration with gravity, m/s²", ["ax", "ay", "az"]),
     ("Acceleration without gravity, m/s²", ["lx", "ly", "lz"]),
-    ("Rotation rate, deg/s", ["gx", "gy", "gz"]),
+    ("Rotation rate about each axis, deg/s", ["gx", "gy", "gz"]),
 ]
+# stored rotation column -> the axis it turns about (D-51)
+ROTATION_AXIS = {"gx": "y", "gy": "z", "gz": "x"}
 
 
 def apply_style() -> None:
@@ -97,7 +99,7 @@ def plot_trial(samples: pd.DataFrame, trial: pd.Series, groups=TRIAL_GROUPS):
         for ch in chans:
             if ch not in samples or samples[ch].isna().all():
                 continue
-            name = ch[-1]
+            name = ROTATION_AXIS.get(ch, ch[-1])
             ax.plot(samples["t_s"], samples[ch], color=AXIS_COLORS[name], label=name, zorder=2)
             ends.append((samples[ch].dropna().iloc[-1], name))
         ax.set_title(title)
@@ -159,13 +161,17 @@ def plot_reach_profiles(samples: pd.DataFrame, channels: list[str], ncols: int =
             ax.set_title(CHANNEL_LABELS.get(ch, ch), fontsize=9)
             continue
         grid = np.linspace(0, 1, len(cols))
+        means = {}
         for hand in ["right", "left"]:
             p = prof.loc[prof["hand"] == hand, cols].to_numpy()
             counts[hand] = len(p)
             for row in p:
                 ax.plot(grid, row, color=HAND_COLORS[hand], lw=0.7, alpha=0.25, zorder=1)
             if len(p):
-                ax.plot(grid, p.mean(axis=0), color=HAND_COLORS[hand], lw=2, zorder=3)
+                means[hand] = p.mean(axis=0)
+        for hand, m in means.items():  # means on top of all single movements, with a light edge
+            ax.plot(grid, m, color=HAND_COLORS[hand], lw=2.4, zorder=3,
+                    path_effects=[patheffects.Stroke(linewidth=4.2, foreground=SURFACE), patheffects.Normal()])
         ax.set_title(CHANNEL_LABELS.get(ch, ch), fontsize=9)
         panel_counts[CHANNEL_LABELS.get(ch, ch)] = (counts["right"], counts["left"])
     for ax in axes.flat[len(channels):]:
